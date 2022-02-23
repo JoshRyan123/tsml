@@ -1,6 +1,6 @@
 package Laboratories.lab3;
 
-import tsml.src.main.java.experiments.data.DatasetLoading;
+import experiments.data.DatasetLoading;
 import weka.classifiers.trees.Id3;
 import weka.classifiers.trees.J48;
 import weka.classifiers.trees.j48.Distribution;

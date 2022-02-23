@@ -5,7 +5,7 @@
 
 package Laboratories.lab3;
 
-import tsml.src.main.java.experiments.data.DatasetLoading;
+import experiments.data.DatasetLoading;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Sourcable;
 import weka.classifiers.trees.j48.*;
@@ -70,9 +70,9 @@ public class J48 extends AbstractClassifier implements OptionHandler, Drawable, 
         // Mimics behaviour of CART Decision Tree
         if (this.m_binarySplits) {
             // uses enumeration
-            modSelection = new BinC45ModelSelection(this.m_minNumObj, instances, this.m_useMDLcorrection, this.m_doNotMakeSplitPointActualValue);
+            modSelection = new BinC45ModelSelection(this.m_minNumObj, instances, this.m_useMDLcorrection);
         } else {
-            modSelection = new C45ModelSelection(this.m_minNumObj, instances, this.m_useMDLcorrection, this.m_doNotMakeSplitPointActualValue);
+            modSelection = new C45ModelSelection(this.m_minNumObj, instances, this.m_useMDLcorrection);
         }
 
         if (!this.m_reducedErrorPruning) {

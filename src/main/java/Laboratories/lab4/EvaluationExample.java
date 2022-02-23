@@ -1,11 +1,12 @@
 package Laboratories.lab4;
 
-import lab3.J48;
-import tsml.src.main.java.evaluation.MultipleClassifierEvaluation;
-import tsml.src.main.java.evaluation.tuning.ParameterSpace;
-import tsml.src.main.java.experiments.data.DatasetLoading;
-import tsml.src.main.java.fileIO.OutFile;
-import tsml.src.main.java.machine_learning.classifiers.tuned.TunedClassifier;
+import Laboratories.lab3.J48;
+import evaluation.MultipleClassifierEvaluation;
+import evaluation.tuning.ParameterSpace;
+import experiments.Experiments;
+import experiments.data.DatasetLoading;
+import fileIO.OutFile;
+import machine_learning.classifiers.tuned.TunedClassifier;
 import weka.classifiers.evaluation.Evaluation;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -56,11 +57,11 @@ public class EvaluationExample {
             expSettings.resultsWriteLocation = "C:/Work/Machine Learning/ML-Laboratories/Results/";
             expSettings.datasetName = str;
             // NEEDS FIXING
-            //expSettings.classifier
+            expSettings.classifier = c45;
             expSettings.run();
 
-//            expSettings.classifierName = "TunedC45";
-            //expSettings.classifier
+            expSettings.classifierName = "TunedC45";
+            expSettings.classifier = TunedC45;
             expSettings.forceEvaluation = true; // Overwrite existing results?
             // repeated resamples: loop and change fold Id each time
             expSettings.foldId = 10;  // note that since we're now setting the fold directly, we can resume zero-indexing

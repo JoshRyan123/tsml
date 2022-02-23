@@ -1,7 +1,7 @@
 package Laboratories.lab3;
 
-import tsml.src.main.java.experiments.data.DatasetLoading;
-import tsml.src.main.java.utilities.InstanceTools;
+import experiments.data.DatasetLoading;
+import utilities.InstanceTools;
 import weka.classifiers.trees.RandomForest;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -51,13 +51,13 @@ public class LiveEnsemble {
         // set number of threads
         randForest.setNumExecutionSlots(5);
 
-        randForest.setNumIterations(10);
+        randForest.setNumTrees(10);
         randForest.setSeed(1);
-        randForest.setCalcOutOfBag(true);
+        //randForest.setCalcOutOfBag(true);
         randForest.buildClassifier(split[0]);
 
 
-        randForest.setNumIterations(500);
+        randForest.setNumTrees(500);
 
 
         // additionally should check out adaboost

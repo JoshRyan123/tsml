@@ -17,7 +17,7 @@ import java.util.Random;
 
 public class ClassifierEvaluation {
 
-    public static String basePath="C:\\Work\\Machine Learning\\ML-Laboratories\\Data\\UCI\\";
+    public static String basePath="C:\\Work\\GitHub\\tsml\\Data\\UCI\\";
 
     public static void tunedComparison(){
 
@@ -87,7 +87,7 @@ public class ClassifierEvaluation {
         c.buildClassifier(split[0]);
 
 
-        OutFile out = new OutFile("C:/Work/Machine Learning/ML-Laboratories/Results/"+problem+"Resample0.csv");
+        OutFile out = new OutFile("C:/Work/GitHub/tsml/Results/"+problem+"Resample0.csv");
         out.writeLine(c.getClass().getSimpleName()+","+problem);
 
         out.writeLine("No parameter info");
@@ -118,7 +118,7 @@ public class ClassifierEvaluation {
         Experiments.ExperimentalArguments expSettings = new Experiments.ExperimentalArguments();
         expSettings.classifier = new J48();
         expSettings.dataReadLocation = basePath;
-        expSettings.resultsWriteLocation = "C:/Work/Machine Learning/ML-Laboratories/Results/";
+        expSettings.resultsWriteLocation = "C:/Work/GitHub/tsml/Results/";
         expSettings.classifierName = "C45";
         expSettings.datasetName = "bank";
         expSettings.forceEvaluation = true; // Overwrite existing results?
@@ -209,7 +209,7 @@ public class ClassifierEvaluation {
         cls[3]=tunedC45;
 
         expSettings.dataReadLocation = basePath;
-        expSettings.resultsWriteLocation = "C:/Work/Machine Learning/ML-Laboratories/Results/";
+        expSettings.resultsWriteLocation = "C:/Work/GitHub/tsml/Results/";
         expSettings.forceEvaluation = true; // Overwrite existing results?
         expSettings.debug = true;
 
@@ -235,10 +235,10 @@ public class ClassifierEvaluation {
     public static void multipleClassifierEvaluation() throws Exception {
         System.out.println("Classifier evaluation begins");
         // tsml code:
-        MultipleClassifierEvaluation mce = new MultipleClassifierEvaluation("C:/Work/Machine Learning/ML-Laboratories/Results/","MyExperiment", 5);
+        MultipleClassifierEvaluation mce = new MultipleClassifierEvaluation("C:/Work/GitHub/tsml/Results/","MyExperiment", 5);
         // parameters:
         mce.setDatasets(allProblems);
-        mce.readInClassifiers(new String[] {"C45","RandF","RandF500","TunedC45"},"C:/Work/Machine Learning/ML-Laboratories/Results/");
+        mce.readInClassifiers(new String[] {"C45","RandF","RandF500","TunedC45"},"C:/Work/GitHub/tsml/Results/");
         mce.setIgnoreMissingResults(true);//remove null
         mce.setBuildMatlabDiagrams(false);
         mce.setTestResultsOnly(true);

@@ -1,5 +1,6 @@
 package Laboratories.lab2;
 
+import Laboratories.lab1.MyClassifier;
 import weka.core.Instance;
 import weka.core.Instances;
 
@@ -8,7 +9,7 @@ import java.io.FileReader;
 public class WekaTools {
 
     public void measureAccuracy(Instances data) throws Exception {
-        lab1.MyClassifier cls = new lab1.MyClassifier();
+        MyClassifier cls = new MyClassifier();
         cls.buildClassifier(data);
 
         int count = 0;

@@ -1,6 +1,6 @@
 package Laboratories.lab2;
 
-import tsml.src.main.java.experiments.data.DatasetLoading;
+import experiments.data.DatasetLoading;
 import weka.classifiers.AbstractClassifier;
 import weka.core.Instance;
 import weka.core.Instances;

@@ -88,7 +88,7 @@ public class Test {
             Instances C = new Instances(reader2);
             C.setClassIndex(C.numAttributes() - 1);
 
-            lab1.MyClassifier cls = new lab1.MyClassifier();
+            MyClassifier cls = new MyClassifier();
             cls.buildClassifier(C);
 
             int count = 0;

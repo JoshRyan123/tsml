@@ -1,8 +1,8 @@
 package Laboratories.lab2;
 
-import lab1.HistogramClassifier;
-import tsml.src.main.java.experiments.data.DatasetLoading;
-import tsml.src.main.java.utilities.InstanceTools;
+import Laboratories.lab1.HistogramClassifier;
+import experiments.data.DatasetLoading;
+import utilities.InstanceTools;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.core.Instance;

@@ -44,7 +44,7 @@
 
 package Laboratories.lab3;
 
-import tsml.src.main.java.experiments.data.DatasetLoading;
+import experiments.data.DatasetLoading;
 import weka.classifiers.Classifier;
 import weka.classifiers.Sourcable;
 import weka.classifiers.trees.J48;
@@ -122,9 +122,9 @@ public class C45 implements Classifier, OptionHandler, Drawable, Matchable, Sour
         ModelSelection modSelection;
 
         if (m_binarySplits)
-            modSelection = new BinC45ModelSelection(m_minNumObj, instances, true, true);
+            modSelection = new BinC45ModelSelection(m_minNumObj, instances, true);
         else
-            modSelection = new C45ModelSelection(m_minNumObj, instances, true, true);
+            modSelection = new C45ModelSelection(m_minNumObj, instances, true);
         if (!m_reducedErrorPruning)
             // ModelSelection object controls the attribute selection
             m_root = new C45PruneableClassifierTree(modSelection, !m_unpruned, m_CF,
