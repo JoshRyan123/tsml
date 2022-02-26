@@ -41,8 +41,8 @@ manifest.mf
 defaultShapeletOutput.txt
 
 # testing and local results files
-#Results/
-#results/
+Results/
+results/
 Analysis/
 
 # Personal working environments.
