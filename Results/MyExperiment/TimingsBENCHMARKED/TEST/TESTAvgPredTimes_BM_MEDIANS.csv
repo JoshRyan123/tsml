@@ -1,7 +1,0 @@
-TESTAvgPredTimes_BM,RandF500,RandF,C45,TunedC45
-blood,-0.14805,-0.0042,-3.0E-4,-1.0E-4
-hayes-roth,-0.0939,-0.0121,-0.0029,-2.0E-4
-bank,-0.1651,-0.0026,-4.0E-4,-1.0E-4
-balance-scale,-0.0889,-0.0017,-6.0E-4,-1.0E-4
-monks-1,-0.0572,-0.0024,-4.0E-4,-1.0E-4
-breast-cancer-wisc-diag,-0.041,-0.002,-4.0E-4,-1.0E-4

@@ -1,5 +1,6 @@
 package Laboratories.lab4;
 
+import evaluation.storage.ClassifierResults;
 import evaluation.tuning.ParameterSpace;
 import experiments.Experiments;
 import experiments.data.DatasetLoading;
@@ -15,13 +16,14 @@ import weka.core.Instances;
 
 import java.util.Random;
 
+import static experiments.TonyCollateResults.collate;
 import static org.apache.log4j.NDC.clear;
 
 public class Whiskylab {
     public static String basePath="C:\\Work\\GitHub\\tsml\\Data\\Labs\\";
 
     static String[] allClassifiers={"NaiveBayes","BayesNet", "AODE", "AODEsr", "BayesianLogisticRegression", "ComplementNaiveBayes", "DMNBtext", "NaiveBayesSimple", "NaiveBayesUpdateable"};
-    static String[] allProblems ={"WhiskyData"};
+    static String[] allProblems ={"WhiskyData", "Aedes"};
 
     public static Classifier setClassifier(String c){
         switch(c){
@@ -62,7 +64,7 @@ public class Whiskylab {
         c.buildClassifier(split[0]);
 
 
-        OutFile out = new OutFile("C:/Work/GitHub/tsml/Results/"+problem+"Resample0.csv");
+        OutFile out = new OutFile("C:/Work/GitHub/tsml/Results/Naive_"+problem+"_Resample0.csv");
         out.writeLine(c.getClass().getSimpleName()+","+problem);
 
         out.writeLine("No parameter info");
@@ -124,44 +126,49 @@ public class Whiskylab {
 
         //"AODE", "AODEsr", "BayesianLogisticRegression", "ComplementNaiveBayes", "DMNBtext", "NaiveBayesSimple", "NaiveBayesUpdateable
 
-        Classifier[] cls= new Classifier[2];
+        Classifier[] cls= new Classifier[5];
 
-        String[] names = {"NaiveBayes","BayesNet"};
+        String[] names = {"NaiveBayes","BayesNet", "BayesianLogisticRegression", "DMNBtext", "NaiveBayesUpdateable"};
 
+        // do work:
         NaiveBayes naive = new NaiveBayes();
         BayesNet net = new BayesNet();
-//        AODE aode = new AODE();
-//        AODEsr star = new AODEsr();
-//        BayesianLogisticRegression logreg = new BayesianLogisticRegression();
-//        ComplementNaiveBayes complement = new ComplementNaiveBayes();
-//        DMNBtext dmnb = new DMNBtext();
+        BayesianLogisticRegression logreg = new BayesianLogisticRegression();
+        DMNBtext dmnb = new DMNBtext();
 //        NaiveBayesSimple simple = new NaiveBayesSimple();
-//        NaiveBayesUpdateable updateable = new NaiveBayesUpdateable();
+//        System.out.println(simple.getCapabilities());
+        NaiveBayesUpdateable updateable = new NaiveBayesUpdateable();
+
+        // dont work:
+//        AODE aode = new AODE();
+//        System.out.println(aode.getCapabilities());
+//        AODEsr star = new AODEsr();
+//        System.out.println(star.getCapabilities());
+//        ComplementNaiveBayes complement = new ComplementNaiveBayes();
+//        System.out.println(complement.getCapabilities());
 
         // allocate classifiers
         cls[0]=naive;
         cls[1]=net;
-//        cls[3]=star;
-//        cls[4]=logreg;
-//        cls[5]=complement;
-//        cls[6]=dmnb;
-//        cls[7]=simple;
-//        cls[8]=updateable;
+        cls[2]=logreg;
+        cls[3]=dmnb;
+//        cls[4]=simple;
+        cls[4]=updateable;
 
         expSettings.dataReadLocation = basePath;
         expSettings.resultsWriteLocation = "C:/Work/GitHub/tsml/Results/";
-        expSettings.forceEvaluation = true; // Overwrite existing results?
+        //expSettings.forceEvaluation = true; // Overwrite existing results?
         expSettings.debug = true;
 
         //If splits are not defined, can set here, the default is 50/50 splits
-        DatasetLoading.setProportionKeptForTraining(0.5);
+        DatasetLoading.setProportionKeptForTraining(0.7);
 
         for(int i=0;i<cls.length;i++) {
             expSettings.classifierName = names[i];
             expSettings.classifier = cls[i];
             for (String str : allProblems) {
-                // 5 folds
-                for (int j = 0; j < 5; j++) {
+                // 10 folds of cross validation
+                for (int j = 0; j < 11; j++) {
                     expSettings.datasetName = str;
                     expSettings.foldId = j;  // note that since we're now setting the fold directly, we can resume zero-indexing
                     Experiments.setupAndRunExperiment(expSettings);
@@ -183,9 +190,76 @@ public class Whiskylab {
  *  Work out NLL
  *  Work out AUROC
  */
-        clear();
-        // runExperimentManually();
+
+        runExperimentManually();
         runMultipleExperiments();
+
+
+
+//        String[] str={
+//                "E:\\ResultsDirectory\\",
+//                "Z:\\DataDirectory\\",
+//                "10",//Number of resamples for each dataset
+//                "false",                            //Don’t worry at the moment
+//                "ClassifierName",
+//                "0"}; //Don’t worry at the moment
+//        collate(str);
+
+        // so for the above data I would use
+        String[] str={
+
+                "C:/Work/GitHub/tsml/Results/",
+                "C:/Work/GitHub/tsml/Data/Labs/",
+                "11", // Number of resamples for each dataset
+                "false",
+                "NaiveBayes",
+                "0"};
+
+        collate(str);
+
+
+
+
+
+
+
+
+        // classify results:
+
+        ClassifierResults res=new ClassifierResults();
+
+        res.setClassifierName("testClassifier");
+
+        res.setDatasetName("C:/Work/GitHub/tsml/Results/Naive_WhiskyData_Resample0.csv");
+
+        res.setBuildTime(2);
+        res.setTestTime(1);
+
+        Random rng = new Random(0);
+        for (int i = 0; i < 10; i++) { //obvs dists dont make much sense, not important here
+            res.addPrediction(rng.nextInt(2), new double[] { rng.nextDouble(), rng.nextDouble()}, rng.nextInt(2), rng.nextInt(5)+1, "test,again");
+        }
+
+        res.finaliseResults();
+
+        System.out.println(res.writeFullResultsToString());
+        System.out.println("\n\n");
+
+        res.writeFullResultsToFile("C:/Work/GitHub/tsml/Results/Naive_WhiskyData_ClassifyResults.csv");
+
+        ClassifierResults res2 = new ClassifierResults("C:/Work/GitHub/tsml/Results/Naive_WhiskyData_ClassifyResults.csv");
+        System.out.println(res2.writeFullResultsToString());
+
+//        res.findAllStats();
+//        res.findAllStatsOnce();
+//        //res.findBalancedAcc();
+//        res.findEarliness();
+//        //res.findF1();
+//        res.findMeanAUROC();
+//        res.findNLL();
+//        //res.computeMCC();
+//        res.findHarmonicMean();
+//        res.allPerformanceMetricsToString();
 
     }
 
