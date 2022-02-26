@@ -17,7 +17,7 @@ import java.util.Random;
 
 public class ClassifierEvaluation {
 
-    public static String basePath="C:\\Work\\GitHub\\tsml\\Data\\UCI\\";
+    public static String basePath="C:\\Work\\GitHub\\tsml\\Data\\Labs\\WhiskyData\\";
 
     public static void tunedComparison(){
 
@@ -235,7 +235,7 @@ public class ClassifierEvaluation {
     public static void multipleClassifierEvaluation() throws Exception {
         System.out.println("Classifier evaluation begins");
         // tsml code:
-        MultipleClassifierEvaluation mce = new MultipleClassifierEvaluation("C:/Work/GitHub/tsml/Results/","MyExperiment", 5);
+        MultipleClassifierEvaluation mce = new MultipleClassifierEvaluation("C:/Work/GitHub/tsml/Results/","C45vsRandFvsRandF500vsTunedC45", 5);
         // parameters:
         mce.setDatasets(allProblems);
         mce.readInClassifiers(new String[] {"C45","RandF","RandF500","TunedC45"},"C:/Work/GitHub/tsml/Results/");
