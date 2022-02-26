@@ -1,0 +1,7 @@
+,RandF500_VS_RandF500,RandF500_VS_RandF,RandF500_VS_TunedC45,RandF500_VS_C45,RandF_VS_RandF500,RandF_VS_RandF,RandF_VS_TunedC45,RandF_VS_C45,TunedC45_VS_RandF500,TunedC45_VS_RandF,TunedC45_VS_TunedC45,TunedC45_VS_C45,C45_VS_RandF500,C45_VS_RandF,C45_VS_TunedC45,C45_VS_C45
+blood,0,-1,-1,-1,1,0,-1,-1,1,1,0,-1,1,1,1,0
+hayes-roth,0,-1,-1,-1,1,0,-1,-1,1,1,0,1,1,1,-1,0
+bank,0,-1,-1,-1,1,0,0,-1,1,0,0,-1,1,1,1,0
+balance-scale,0,-1,-1,-1,1,0,-1,-1,1,1,0,1,1,1,-1,0
+monks-1,0,-1,-1,-1,1,0,-1,-1,1,1,0,-1,1,1,1,0
+breast-cancer-wisc-diag,0,-1,-1,-1,1,0,1,0,1,-1,0,-1,1,0,1,0

@@ -1,0 +1,45 @@
+TESTAvgPredTimesBenchmarked,RandF,C45
+AvgTESTAvgPredTimesBenchmarkedOverDsets:,-0.09520833333333333,-2.75E-4
+AvgTESTAvgPredTimesBenchmarkedRankOverDsets:,1.0,2.0
+StddevOfTESTAvgPredTimesBenchmarkedOverDsets:,0.039133827012786095,2.6028830169640745E-4
+AvgOfStddevsOfTESTAvgPredTimesBenchmarkedOverDsetFolds:,0.01883078299277288,2.4810788674364424E-4
+StddevsOfTESTAvgPredTimesBenchmarkedRanksOverDsets:,0.0,0.0
+
+flat,RandF,C45
+RandF,0|6|0,0|0|6
+C45,6|0|0,0|6|0
+
+
+
+p=0.01,RandF,C45
+RandF,0|6|0,0|0|6
+C45,6|0|0,0|6|0
+
+
+
+p=0.05,RandF,C45
+RandF,0|6|0,0|0|6
+C45,6|0|0,0|6|0
+
+
+
+T TEST,RandF,C45
+RandF,0.0,0.00189641
+C45,0.0,0.0
+
+SIGN TEST,RandF,C45
+RandF,0.0,0.0
+C45,0.0,0.0
+
+SIGN RANK TEST,RandF,C45
+RandF,0.0,0.02770785
+C45,0.0,0.0
+
+NOSIGDIFFERENCE,RandF,C45
+RandF,true,false
+C45,false,true
+
+
+
+cliques = []
+
