@@ -17,7 +17,7 @@ import java.util.Random;
 
 public class ClassifierEvaluation {
 
-    public static String basePath="C:\\Work\\GitHub\\tsml\\Data\\Labs\\WhiskyData\\";
+    public static String basePath="C:\\Work\\GitHub\\tsml\\Data\\UCI\\";
 
     public static void tunedComparison(){
 
@@ -111,11 +111,20 @@ public class ClassifierEvaluation {
             System.out.print("\n");
             out.writeString("\n");
         }
+        Evaluation eval = new Evaluation(split[0]);
+
+        // 1 model:
+        eval.evaluateModel(c, split[1]);
+        // 10 models:
+        eval.crossValidateModel(c, data, 10, new Random());
+
+        System.out.println(eval.toSummaryString("\nResults\n======\n", false));
     }
 
 
     public static void runExperimentAutomatically() throws Exception {
         Experiments.ExperimentalArguments expSettings = new Experiments.ExperimentalArguments();
+        TunedClassifier tuned = new TunedClassifier();
         expSettings.classifier = new J48();
         expSettings.dataReadLocation = basePath;
         expSettings.resultsWriteLocation = "C:/Work/GitHub/tsml/Results/";
@@ -129,6 +138,12 @@ public class ClassifierEvaluation {
         DatasetLoading.setProportionKeptForTraining(0.75);
         Experiments.setupAndRunExperiment(expSettings);
         expSettings.run();
+
+        expSettings.classifierName="TunedC45";
+        expSettings.classifier=tuned;
+        expSettings.forceEvaluation=false;
+        expSettings.run();
+        System.out.println(" TunedC45 = " + tuned.getParameters());
     }
 
 
@@ -254,25 +269,25 @@ public class ClassifierEvaluation {
  *  Work out NLL
  *  Work out AUROC
  */
-            runExperimentManually();
-            runExperimentAutomatically();
-            runMultipleExperiments();
+        //    runExperimentManually();
+        //    runExperimentAutomatically();
+        //    runMultipleExperiments();
 
         /*  Part 2: Generating performance measures in code */
-                   evaluateInCode();
+        //           evaluateInCode();
         /*  Part 3: Generating performance measures from results files */
         //Create results files
         multipleClassifierEvaluation();
 
         //Compare
-        compareClassifiers();
+        //compareClassifiers();
 
         //generateResultsExample(30);
         //collateStatsExample(30);
         //createSingleResultsFile(30);
     }
 
-    private static void compareClassifiers() {
+    private static void compareClassifiers() throws Exception {
     }
 }
 // Creating CM in Excel : [14:00]
