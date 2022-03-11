@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 
-public class Demo {
+public class MainDemo {
     public static String basePath="C:\\Work\\GitHub\\tsml\\Data\\";
 
     public static void main(String[] args) throws Exception {
@@ -49,8 +49,10 @@ public class Demo {
 
         //oneNN model = new oneNN();
         kNN model = new kNN();
+
         //weka 1NN:
         //IB1 model = new IB1();
+
         //weka KNN:
         //IBk model = new IBk();
 
@@ -102,28 +104,6 @@ public class Demo {
         evaluation.evaluateModel(model1, dividedDataset[1]);
         System.out.println(evaluation.toSummaryString());
         System.out.println(evaluation.toMatrixString());
-    }
-
-    public static Instances loadData1(String dataLocation){
-        Instances data = null;
-        try{
-            FileReader reader = new FileReader(dataLocation);
-            data = new Instances(reader);
-        }catch(Exception e){
-            System.out.println("Exception caught: "+e);
-        }
-        return data;
-    }
-
-    public static Instances loadData2(String dataLocation){
-        Instances data = null;
-        try{
-            ConverterUtils.DataSource source = new ConverterUtils.DataSource(dataLocation);
-            data = source.getDataSet();
-        }catch(Exception e){
-            System.out.println("Exception caught: "+e);
-        }
-        return data;
     }
 
     public static double[] classDistribution(Instances data){
