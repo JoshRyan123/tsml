@@ -1,4 +1,4 @@
-package Laboratories.lab6;
+package Laboratories.lab5;
 
 import Laboratories.lab5.kNN;
 import weka.classifiers.Classifier;

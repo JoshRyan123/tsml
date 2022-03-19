@@ -78,6 +78,7 @@ public class kNN extends AbstractClassifier {
     }
 
     //for NN the class predicted has 100% distribution
+    // try and use a function to wrap similar code from below and above
     @Override
     public double[] distributionForInstance(Instance inst) throws Exception{
 

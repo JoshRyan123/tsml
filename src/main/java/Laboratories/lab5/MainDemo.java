@@ -5,6 +5,7 @@ import org.checkerframework.checker.units.qual.A;
 import utilities.InstanceTools;
 import weka.classifiers.Classifier;
 import weka.classifiers.evaluation.Evaluation;
+import weka.classifiers.functions.MultilayerPerceptron;
 import weka.classifiers.lazy.IB1;
 import weka.classifiers.lazy.IBk;
 import weka.core.Instance;
@@ -47,12 +48,13 @@ public class MainDemo {
         System.out.println("Number of class labels:"+split[0].numClasses());
         System.out.println("Class distribution:"+ Arrays.toString(classDistribution(split[0])));
 
+        //MultilayerPerceptron model = new MultilayerPerceptron();
+
         //oneNN model = new oneNN();
         kNN model = new kNN();
 
         //weka 1NN:
         //IB1 model = new IB1();
-
         //weka KNN:
         //IBk model = new IBk();
 
@@ -106,6 +108,8 @@ public class MainDemo {
         System.out.println(evaluation.toMatrixString());
     }
 
+
+    // explains the frequency or how often each class appears in the dataset
     public static double[] classDistribution(Instances data){
         int[] count = new int[data.numClasses()];
         double[] distribution = new double[data.numClasses()];
@@ -146,6 +150,7 @@ public class MainDemo {
         return split;
     }
 
+    // compare actual class with prediction class
     public static double accuracy(Classifier model, Instances test) throws Exception {
         int prediction, actual;
         int count=0;
