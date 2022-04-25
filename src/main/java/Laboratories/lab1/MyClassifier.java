@@ -60,18 +60,6 @@ public class MyClassifier extends AbstractClassifier {
     @Override
     public double[] distributionForInstance(Instance instance) throws Exception {
         double[] prob = new double[instance.numClasses()];
-        double x = instance.value(0);
-        double y = instance.value(1);
-        double z = instance.value(2);
-        if(x==1){
-            prob[0] = 0.333;
-        }
-        if(y==1){
-            prob[1] = 0.333;
-        }
-        if(z==1){
-            prob[2] = 0.333;
-        }
         return prob;
     }
 }

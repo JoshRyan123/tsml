@@ -203,10 +203,8 @@ public class HistogramClassifier implements Classifier {
 
     public static void main(String[] args) throws Exception {
         Instances all;
-        String dataPath = "C:\\Users\\Tony\\OneDrive - University of East Anglia\\Teaching\\2020-2021\\Machine " +
-                "Learning\\Week 2 - Decision Trees\\Week 2 Live " +
-                "Class\\tsml-master\\src\\main\\java\\experiments\\data\\uci\\iris\\";
-        all = DatasetLoading.loadData(dataPath + "iris");
+        String dataPath = "C:\\Work\\GitHub\\tsml\\Data\\UCI\\iris\\iris.arff";
+        all = DatasetLoading.loadData(dataPath);
         //Build on all the iris data
         HistogramClassifier hc = new HistogramClassifier();
         hc.buildClassifier(all);
@@ -217,7 +215,7 @@ public class HistogramClassifier implements Classifier {
         for (Instance ins : all) {
             int pred = (int) hc.classifyInstance(ins);
             int actual = (int) ins.classValue();
-//            System.out.println(" Actual = "+actual+" Predicted ="+pred);
+            System.out.println(" Actual = "+actual+" Predicted ="+pred);
             if (pred == actual)
                 correct++;
         }
@@ -231,7 +229,7 @@ public class HistogramClassifier implements Classifier {
         for (Instance ins : split[1]) {
             int pred = (int) hc.classifyInstance(ins);
             int actual = (int) ins.classValue();
-//            System.out.println(" Actual = "+actual+" Predicted ="+pred);
+            System.out.println(" Actual = "+actual+" Predicted ="+pred);
             if (pred == actual)
                 correct++;
         }

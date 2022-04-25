@@ -9,15 +9,14 @@ import java.io.FileReader;
 public class Test {
     public static void main(String[] args) throws Exception {
         /** Instance – an object to store a single case/instance from a problem **/
-
         /** Instances – an object that stores a set of cases e.g. multiple
          Instance objects **/
 
         String firstDataLocation= "Data/lab1/Arsenal_TRAIN.arff";
         String secondDataLocation= "Data/lab1/Arsenal_TEST.arff";
-//
+
 //        Instances wdbc = DatasetLoading.loadData(firstDataLocation);
-//
+
         /* Labsheet question 1 */
         Instances A = loadDataset(firstDataLocation);
         Instances B = loadDataset(secondDataLocation);
