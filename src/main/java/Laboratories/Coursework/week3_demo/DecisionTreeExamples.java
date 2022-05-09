@@ -47,7 +47,7 @@ public class DecisionTreeExamples {
 
     }
     public static void  IGExample() throws IOException {
-// Form a count matrix for temperature and outlook
+        // Form a count matrix for temperature and outlook
         Instances playGolf= DatasetLoading.loadData("src/main/java/ml6002b2022/week3_demo/playGolf");
         int[][] outlook = new int[playGolf.attribute("Outlook").numValues()][playGolf.numClasses()];
 

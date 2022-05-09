@@ -15,7 +15,7 @@ public class Demo2 {
 
     public static void main(String[] args) throws Exception {
 
-        String dataLocation="FootballPlayers.arff";
+        String dataLocation="C:\\Work\\GitHub\\tsml\\Data\\FootballPlayers.arff";
         Instances data = loadData2(dataLocation);
 
         if(data.classIndex() == -1)
