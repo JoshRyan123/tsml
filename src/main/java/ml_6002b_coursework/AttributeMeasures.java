@@ -75,9 +75,16 @@ public class AttributeMeasures {
     // returns info gain ratio for contingency table
     static double measureInformationGain(int[][] table) throws Exception {
         // entropy is 1 as 50/50 split (base entropy)
+        int k, p;
+        double total = 0;
         double [] classCounts = new double[table.length];
-        classCounts[0] = table[0][0]+table[1][0];
-        classCounts[1] = table[1][1]+table[0][1];
+
+        for (k = 0; k < classCounts.length; k++) {
+            for (p = 0; p < table[k].length; p++) {
+                classCounts[k] = table[0][k]+table[1][k];
+                total += table[k][p];
+            }
+        }
 
         double baseEntropy = 0;
         for (int j = 0; j < table.length; j++) {
@@ -85,10 +92,10 @@ public class AttributeMeasures {
                 baseEntropy -= classCounts[j] * Utils.log2(classCounts[j]);
             }
         }
-        baseEntropy /= (double) table[0][0]+table[0][1]+table[1][0]+table[1][1];
-        baseEntropy += Utils.log2(table[0][0]+table[0][1]+table[1][0]+table[1][1]);
+        baseEntropy /= total;
+        baseEntropy += Utils.log2(total);
 
-        // System.out.println("starting entropy: "+baseEntropy);
+        System.out.println("starting entropy: "+baseEntropy);
 
         // set info gain equal to starting entropy
         double infoGain = baseEntropy;
@@ -113,9 +120,60 @@ public class AttributeMeasures {
     }
 
     // returns gini measure for contingency table
-//    static double measureGini(int[][] arr) {
-//        return
-//    }
+    static double measureGini(int[][] arr) {
+        double[] parentDistribution = new double[arr.length];
+        double[][] childDistributions = new double[arr.length][2];
+
+        // entropy is 1 as 50/50 split (base entropy)
+        int k, p;
+        double total = 0;
+        double totalLeft = 0;
+        double totalRight = 0;
+        double [] classCounts = new double[arr.length];
+
+        for (k = 0; k < classCounts.length; k++) {
+            for (p = 0; p < arr[k].length; p++) {
+                parentDistribution[k] = arr[0][k]+arr[1][k];
+                childDistributions[k][p] = arr[k][p];
+                total += arr[k][p];
+                //totalRight += table[i][0]+table[i][1]
+            }
+        }
+//        for (int q = 0; q < parentDistribution.length; q++) {
+//            if (classCounts[q] > 0) {
+//                parentDistribution[q] /= total;
+//            }
+//        }
+
+        double totalWeight = Utils.sum(parentDistribution);
+        if (totalWeight==0) return 0;
+
+        double leftWeight = Utils.sum(childDistributions[0]);
+        double rightWeight = Utils.sum(childDistributions[1]);
+
+        double parentVal = 0;
+        for (int i=0; i<parentDistribution.length; i++) {
+            parentVal += (parentDistribution[i]/totalWeight)*(parentDistribution[i]/totalWeight);
+        }
+        parentVal = 1-parentVal;
+        // System.out.println("parent gini index: "+parentVal);
+
+        double leftVal = 0;
+        for (int i=0; i<childDistributions[0].length; i++) {
+            leftVal += (childDistributions[0][i]/leftWeight)*(childDistributions[0][i]/leftWeight);
+        }
+        leftVal = 1-leftVal;
+        // System.out.println("left gini index: "+leftVal);
+
+        double rightVal = 0;
+        for (int i=0; i<childDistributions[1].length; i++) {
+            rightVal += (childDistributions[1][i]/rightWeight)*(childDistributions[1][i]/rightWeight);
+        }
+        rightVal = 1-rightVal;
+        // System.out.println("right gini index: "+rightVal);
+
+        return parentVal - leftWeight/totalWeight*leftVal - rightWeight/totalWeight*rightVal;
+    }
 
     // returns chi statistic for contingency table
 //    static double measureChiSquared(int[][] arr) {
@@ -164,8 +222,12 @@ public class AttributeMeasures {
         // then find the effect (info gain) that node had
         double infoGain = measureInformationGain(Peaty);
         System.out.println(" Measure InfoGain for Peaty = "+1/infoGain);
+
         double infoGainRatio = measureInformationGainRatio(Peaty);
         System.out.println(" Measure InfoGainRatio for Peaty = "+1/infoGainRatio);
+
+        double giniIndex = measureGini(Peaty);
+        System.out.println(" Measure GiniIndex for Peaty = "+giniIndex);
 
 
 
