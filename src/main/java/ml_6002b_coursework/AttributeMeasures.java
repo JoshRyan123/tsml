@@ -1,13 +1,11 @@
 package ml_6002b_coursework;
 
 import experiments.data.DatasetLoading;
-import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Utils;
 
-import java.io.IOException;
-import java.util.Enumeration;
+import java.text.DecimalFormat;
 
 /**
  * Empty class for Part 2.1 of the coursework.
@@ -94,8 +92,7 @@ public class AttributeMeasures {
         }
         baseEntropy /= total;
         baseEntropy += Utils.log2(total);
-
-        System.out.println("starting entropy: "+baseEntropy);
+        // System.out.println("starting entropy: "+baseEntropy);
 
         // set info gain equal to starting entropy
         double infoGain = baseEntropy;
@@ -108,9 +105,6 @@ public class AttributeMeasures {
                 probability = (double) (table[i][j]) /
                         ((table[i][0]+table[i][1]));
                 infoGain -=  (probability * logFunc(probability));
-//                System.out.println("table value [i][0]:"+table[i][0]);
-//                System.out.println("table value [i][1]:"+table[i][1]);
-//                System.out.println("table value [i][1]+[i][0]:"+(table[i][0]+table[i][1]));
 //                System.out.println("probability:"+probability);
 //                System.out.println("log function: "+logFunc(probability));
 //                System.out.println("infogain: "+infoGain);
@@ -120,30 +114,20 @@ public class AttributeMeasures {
     }
 
     // returns gini measure for contingency table
-    static double measureGini(int[][] arr) {
-        double[] parentDistribution = new double[arr.length];
-        double[][] childDistributions = new double[arr.length][2];
+    static double measureGini(int[][] table) {
+        double[] parentDistribution = new double[table.length];
+        double[][] childDistributions = new double[table.length][2];
 
         // entropy is 1 as 50/50 split (base entropy)
         int k, p;
-        double total = 0;
-        double totalLeft = 0;
-        double totalRight = 0;
-        double [] classCounts = new double[arr.length];
+        double [] classCounts = new double[table.length];
 
         for (k = 0; k < classCounts.length; k++) {
-            for (p = 0; p < arr[k].length; p++) {
-                parentDistribution[k] = arr[0][k]+arr[1][k];
-                childDistributions[k][p] = arr[k][p];
-                total += arr[k][p];
-                //totalRight += table[i][0]+table[i][1]
+            for (p = 0; p < table[k].length; p++) {
+                parentDistribution[k] = table[0][k]+table[1][k];
+                childDistributions[k][p] = table[k][p];
             }
         }
-//        for (int q = 0; q < parentDistribution.length; q++) {
-//            if (classCounts[q] > 0) {
-//                parentDistribution[q] /= total;
-//            }
-//        }
 
         double totalWeight = Utils.sum(parentDistribution);
         if (totalWeight==0) return 0;
@@ -157,14 +141,12 @@ public class AttributeMeasures {
         }
         parentVal = 1-parentVal;
         // System.out.println("parent gini index: "+parentVal);
-
         double leftVal = 0;
         for (int i=0; i<childDistributions[0].length; i++) {
             leftVal += (childDistributions[0][i]/leftWeight)*(childDistributions[0][i]/leftWeight);
         }
         leftVal = 1-leftVal;
         // System.out.println("left gini index: "+leftVal);
-
         double rightVal = 0;
         for (int i=0; i<childDistributions[1].length; i++) {
             rightVal += (childDistributions[1][i]/rightWeight)*(childDistributions[1][i]/rightWeight);
@@ -176,9 +158,83 @@ public class AttributeMeasures {
     }
 
     // returns chi statistic for contingency table
-//    static double measureChiSquared(int[][] arr) {
-//        return
-//    }
+    static double measureChiSquared(int[][] table) {
+        double chiSquaredStatistic = 0;
+
+        double[] parentDistribution = new double[table.length];
+        double[][] childDistributions = new double[table.length][2];
+
+        // entropy is 1 as 50/50 split (base entropy)
+        int k, p;
+        double [] classCounts = new double[table.length];
+        for (k = 0; k < classCounts.length; k++) {
+            for (p = 0; p < table[k].length; p++) {
+                parentDistribution[k] = table[0][k]+table[1][k];
+                childDistributions[k][p] = table[k][p];
+            }
+        }
+
+        double totalWeight = Utils.sum(parentDistribution);
+        double leftWeight = Utils.sum(childDistributions[0]);
+        double rightWeight = Utils.sum(childDistributions[1]);
+        if (totalWeight==0) return 0;
+
+        // expected probabilies left: expectedProbabilities[0]
+        // expected probabilies right: expectedProbabilities[1]
+        // get expected probabilities from parent distribution and total parent weight
+        double[] expectedProbabilities = new double[parentDistribution.length];
+        // expected left is total left over each left varaible
+        double[] expectedLeftSplit = new double[parentDistribution.length];
+        double[] actualLeftSplit = new double[parentDistribution.length];
+        double[] expectedRightSplit = new double[parentDistribution.length];
+        double[] actualRightSplit = new double[parentDistribution.length];
+        int i;
+        for (i = 0; i < expectedProbabilities.length; i++) {
+            expectedProbabilities[i] = parentDistribution[i]/totalWeight;
+        }
+
+        // expected equal to total left multiplied by expected distribution
+        for (i = 0; i < expectedLeftSplit.length; i++) {
+            expectedLeftSplit[i] = leftWeight*expectedProbabilities[i];
+        }
+        for (i = 0; i < actualLeftSplit.length; i++) {
+            actualLeftSplit[i] = table[0][i];
+        }
+
+        // expected equal to total right multiplied by expected distribution
+        for (i = 0; i < expectedRightSplit.length; i++) {
+            expectedRightSplit[i] = rightWeight*expectedProbabilities[i];
+        }
+        for (i = 0; i < actualRightSplit.length; i++) {
+            actualRightSplit[i] = table[1][i];
+        }
+
+        // calculate statistics
+        double[] statisticsRight = new double[parentDistribution.length*2];
+        for (i = 0; i < actualRightSplit.length; i++) {
+            statisticsRight[i] = (Math.pow(actualRightSplit[i], 2)-Math.pow(expectedRightSplit[i], 2))/expectedRightSplit[i];
+        }
+        double[] statisticsLeft = new double[parentDistribution.length*2];
+        for (i = 0; i < actualRightSplit.length; i++) {
+            statisticsLeft[i] = (Math.pow(actualLeftSplit[i], 2)-Math.pow(expectedLeftSplit[i], 2))/expectedLeftSplit[i];
+        }
+        chiSquaredStatistic = Utils.sum(statisticsLeft)+Utils.sum(statisticsRight);
+
+//        System.out.println("\nExpected probabilities: "+"{"+expectedProbabilities[1]+" , "+expectedProbabilities[0]+"}");
+//        System.out.println("Parent distribution right:"+parentDistribution[1] +"\nparent distribution left:"+ parentDistribution[0]);
+//        System.out.println("Left Islay: "+childDistributions[0][0] +", left Speyside: "+ childDistributions[0][1]+", right Islay: "+ childDistributions[1][0]+", right Speyside: "+ childDistributions[1][1]+"\n");
+//        System.out.println("Total weight: "+totalWeight +", left weight: "+ leftWeight+", right weight: "+ rightWeight+"\n");
+//
+//        System.out.println("Expected left split = {"+expectedLeftSplit[1]+" , "+expectedLeftSplit[0]+"}");
+//        System.out.println("Actual left split = {"+actualLeftSplit[1]+" , "+actualLeftSplit[0]+"}");
+//        System.out.println("Expected right split = {"+expectedRightSplit[1]+" , "+expectedRightSplit[0]+"}");
+//        System.out.println("Actual right split = {"+actualRightSplit[1]+" , "+actualRightSplit[0]+"}\n");
+//
+//        System.out.println("left statistic = {"+statisticsLeft[1]+" , "+statisticsLeft[0]+"}\n");
+//        System.out.println("right statistic = {"+statisticsRight[1]+" , "+statisticsRight[0]+"}\n");
+
+        return chiSquaredStatistic;
+    }
 
 
     /**
@@ -189,8 +245,6 @@ public class AttributeMeasures {
     // main method test harness should test functionality of each split measure
     // should find each measure for the attribute 'Peaty' in terms of the 'diagnosis'.
     public static void main(String[] args) throws Exception {
-        System.out.println("Not Implemented.");
-
         // data:
         Instances data = DatasetLoading.loadData("C:\\Work\\GitHub\\tsml\\src\\main\\java\\ml_6002b_coursework\\test_data\\Whiskey.arff");
 
@@ -212,7 +266,7 @@ public class AttributeMeasures {
         //                              (0):4 and (1):0 on the other-side (when class value is 1)
         for(int[] x:Peaty) {
             for (int y : x)
-                System.out.print(y + ",");
+                System.out.print(" "+y + ", ");
             System.out.print("\n");
         }
 
@@ -220,17 +274,14 @@ public class AttributeMeasures {
         // ie : 5/6 and 1/6
         // and: 4/4 and 4/0 (pure)
         // then find the effect (info gain) that node had
+        DecimalFormat df=new DecimalFormat("##.######");
         double infoGain = measureInformationGain(Peaty);
-        System.out.println(" Measure InfoGain for Peaty = "+1/infoGain);
-
+        System.out.println(" Measure Information Gain for Peaty = "+df.format(1/infoGain));
         double infoGainRatio = measureInformationGainRatio(Peaty);
-        System.out.println(" Measure InfoGainRatio for Peaty = "+1/infoGainRatio);
-
+        System.out.println(" Measure Information Gain Ratio for Peaty = "+df.format(1/infoGainRatio));
         double giniIndex = measureGini(Peaty);
-        System.out.println(" Measure GiniIndex for Peaty = "+giniIndex);
-
-
-
+        System.out.println(" Measure Gini Index for Peaty = "+df.format(giniIndex));
+        double chiSquared = measureChiSquared(Peaty);
+        System.out.println(" Measure Chi Squared Statistic for Peaty = "+df.format(chiSquared));
     }
-
 }
