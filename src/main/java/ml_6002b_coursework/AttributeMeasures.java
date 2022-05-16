@@ -14,7 +14,7 @@ public class AttributeMeasures {
     // Should follow formula shown in lecture 2, and comment code to indicate edge cases
 
     // returns WEIGHTED info gain (entropy) for contingency table
-    static double measureInformationGainRatio(int[][] table) {
+    static double measureInformationGain(int[][] table) {
         double Entropy;
         double Bag[] = new double [table.length];
         double Class[] = new double [table[0].length];
@@ -63,14 +63,13 @@ public class AttributeMeasures {
         splitEntropy -= newValue;
 
         // calculate total entropy
-        Entropy = oldEntropy-splitEntropy;
+        Entropy = total/(oldEntropy-splitEntropy);
 
         // splits with no gain are useless
         if (Utils.eq(Entropy,0))
             return Double.MAX_VALUE;
 
-        // calculate weighted gain
-        return total/Entropy;
+        return Entropy;
     }
     public static final double logFunc(double num) {
         double log2 = Math.log(2);
@@ -82,7 +81,7 @@ public class AttributeMeasures {
 
 
     // returns info gain ratio for contingency table
-    static double measureInformationGain(int[][] table) throws Exception {
+    static double measureInformationGainRatio(int[][] table) throws Exception {
         // entropy is 1 as 50/50 split (base entropy)
         int k, p;
         double total = 0;
@@ -112,38 +111,44 @@ public class AttributeMeasures {
 
         // set info gain equal to starting entropy
         double splitDist;
+        double splitInfo = 0;
         int i, j;
         for (i = 0; i < table.length; i++) {
             for (j = 0; j < classCounts.length; j++) {
-                // take individual row count and divide by weighting for whole row
+                // take individual split count and divide by weighting for whole split
                 splitDist = (double) (table[i][j]) /
                         ((Utils.sum(table[i])));
+                //System.out.println(Utils.sum(table[i]));
+                //System.out.println(total);
                 // deal with NaN calculations in entropy
                 if (Double.isNaN(splitDist))
                     splitDist = 0;
-                childEnt -=  (splitDist * logFunc(splitDist));
+                //calculate entropy and simtiply by the total split distribution
+                childEnt -=  (Utils.sum(table[i])/total)*(logFunc(splitDist));
+
 //                System.out.println("split distribution:"+splitDist);
 //                System.out.println("log distribution: "+logFunc(splitDist));
 //                System.out.println("resultsing childENt: "+childEnt);
             }
+            // CALCULATE THE SPLIT_INFO(data, att) to normalize the Gain
+            // SPLIT_INFO = (totalSplitWeight/totalParentWeight)*log(totalSplitWeight/totalParentWeight)
+            // i.e 6/10 * log(6/10)
+            //          +
+            //     4/10 * log(4/10)
+            //          =
+            //       splitInfo
+            // then do:
+            //       GainRatio = Entropy/splitInfo
+            splitInfo -= logFunc(Utils.sum(table[i])/total);
+            //System.out.println("splitInfo = "+ splitInfo);
         }
         //System.out.println("childEnt: "+childEnt);
         double infoGain = parentEnt-childEnt;
-//        System.out.println("parent ent: "+parentEnt);
-//        System.out.println("parent ent minus child ent: "+infoGain);
-//        double newValue = 0;
-//        int k,o;
-//        for (k=0;k<Bag.length;k++){
-//            for (o=0;o<Class.length;o++)
-//                newValue = newValue+logFunc(table[k][o]);
-//            // deal with NaN calculations in entropy
-//            if (Double.isNaN(newValue))
-//                newValue = 0;
-//            //System.out.println("log function new value"+logFunc(Bag[k]));
-//            newValue = newValue-logFunc(Bag[k]);
-//        }
-//        // calculate split entropy
-//        splitEntropy -= newValue;
+        //System.out.println("parent ent: "+parentEnt);
+        //System.out.println("parent ent minus child ent: "+infoGain);
+
+        infoGain = infoGain/splitInfo;
+
         return infoGain;
     }
 
@@ -341,9 +346,9 @@ public class AttributeMeasures {
         // then find the effect (info gain) that node had
         DecimalFormat df=new DecimalFormat("##.#####");
         double infoGain = measureInformationGain(Peaty);
-        System.out.println(" Measure Information Gain for Peaty = "+df.format(infoGain));
+        System.out.println(" Measure Information Gain for Peaty = "+df.format(1/infoGain));
         double infoGainRatio = measureInformationGainRatio(Peaty);
-        System.out.println(" Measure Information Gain Ratio for Peaty = "+df.format(1/infoGainRatio));
+        System.out.println(" Measure Information Gain Ratio for Peaty = "+df.format(infoGainRatio));
         double giniIndex = measureGini(Peaty);
         System.out.println(" Measure Gini Index for Peaty = "+df.format(giniIndex));
         double chiSquared = measureChiSquared(Peaty);

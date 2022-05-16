@@ -46,12 +46,12 @@ public class IGAttributeSplitMeasure extends AttributeSplitMeasure {
         if (useGain == true) {
             measure = am.measureInformationGain(table);
             // System.out.println("measure Information Gain for attribute "+att.name()+" splitting diagnosis = " + measure);
-            return measure;
+            return 1/measure;
         }
         else {
             measure = am.measureInformationGainRatio(table);
             // System.out.println("measure Information Gain Ratio for attribute "+ att.name() + " splitting diagnosis = " + 1/measure);
-            return 1/measure;
+            return measure;
         }
     }
 
@@ -64,7 +64,7 @@ public class IGAttributeSplitMeasure extends AttributeSplitMeasure {
         Instances data = DatasetLoading.loadData("src\\main\\java\\ml_6002b_coursework\\test_data\\Whiskey.arff");
 
         IGAttributeSplitMeasure ig = new IGAttributeSplitMeasure();
-        ig.useGain = false;
+        ig.useGain = true;
 
         double[] infoGains = new double[data.numAttributes() - 1];
         Enumeration attEnum = data.enumerateAttributes();
@@ -72,10 +72,10 @@ public class IGAttributeSplitMeasure extends AttributeSplitMeasure {
             Attribute att = (Attribute) attEnum.nextElement();
             infoGains[att.index()] = ig.computeAttributeQuality(data, att);
             if (ig.useGain == true) {
-                System.out.println("measure Information Gain for attribute "+att.name()+" splitting diagnosis = " + infoGains[att.index()]);
+                System.out.println("measure Information Gain for attribute "+ att.name() + " splitting diagnosis = " + infoGains[att.index()]);
             }
             else {
-                System.out.println("measure Information Gain Ratio for attribute "+ att.name() + " splitting diagnosis = " + infoGains[att.index()]);
+                System.out.println("measure Information Gain Ratio for attribute "+att.name()+" splitting diagnosis = " + infoGains[att.index()]);
             }
         }
     }

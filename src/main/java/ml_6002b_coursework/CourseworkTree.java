@@ -291,8 +291,8 @@ public class CourseworkTree extends AbstractClassifier {
         //System.out.println(numeric);
 
         // make a random train/test split for the two datasets using weka's resampleInstances() utility
-        Instances[] splitNumeric = InstanceTools.resampleInstances(numeric, 0, 0.1);
-        Instances[] splitNominal = InstanceTools.resampleInstances(nominal, 0, 0.1);
+        Instances[] splitNumeric = InstanceTools.resampleInstances(numeric, 0, 0.5);
+        Instances[] splitNominal = InstanceTools.resampleInstances(nominal, 0, 0.5);
 
         // initialize info gain trees
         CourseworkTree treeIGOptdigits = new CourseworkTree();
