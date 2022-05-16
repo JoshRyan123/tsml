@@ -46,7 +46,7 @@ public class Week2Examples {
                 correct++;
 //            double[] probs = mc.distributionForInstance(ins);
         }
-        System.out.println(" Train set correct = "+correct+" Accuracy = "+(correct/(double)data.numInstances()));
+        //System.out.println(" Train set correct = "+correct+" Accuracy = "+(correct/(double)data.numInstances()));
 
         // splits data into train and test 50% train 50% test
         Instances[] split = InstanceTools.resampleInstances(data,0,0.5);
@@ -56,12 +56,12 @@ public class Week2Examples {
         Evaluation evaluation = new Evaluation(split[0]);
         evaluation.evaluateModel(cls, split[1]);
 
-        System.out.println(" Evaluation  = "+evaluation.toSummaryString());
+        //System.out.println(" Evaluation  = "+evaluation.toSummaryString());
     }
 
     public static void discreteProblem() throws Exception {
-        Instances train = DatasetLoading.loadData("Data/lab1/Arsenal_TRAIN");
-        Instances test = DatasetLoading.loadData("Data/lab1/Arsenal_TEST");
+        Instances train = DatasetLoading.loadData("Data\\Arsenal_TRAIN.arff");
+        Instances test = DatasetLoading.loadData("Data\\Arsenal_TEST.arff");
 
         // loops through different attributes 'k'
         for(int k=0;k<train.numAttributes()-1;k++) {
@@ -78,14 +78,14 @@ public class Week2Examples {
             }
             for (int i = 0; i < counts.length; i++) {
                 if(i==0){
-                    System.out.println("Player results when not playing:");
+                    //System.out.println("Player results when not playing:");
                 }
                 else if(i==1){
-                    System.out.println("Player results when playing:");
+                    //System.out.println("Player results when playing:");
                 }
                 for (int j = 0; j < counts[i].length; j++)
                     System.out.print(counts[i][j] + ",");
-                System.out.println("");
+                //System.out.println("");
             }
 
             //Find probs
@@ -97,8 +97,8 @@ public class Week2Examples {
     }
 
     public static void main(String[] args) throws Exception {
-        Instances wdbc = DatasetLoading.loadData("Data/lab1/Aedes_Female_VS_House_Fly_POWER.arff");
-        Instances afc = DatasetLoading.loadData("Data/lab1/Arsenal_TRAIN.arff");
+        Instances wdbc = DatasetLoading.loadData("Data\\Labs\\Aedes\\Aedes.arff");
+        Instances afc = DatasetLoading.loadData("Data\\Arsenal_TRAIN.arff");
 
         // using Arsenal_TRAIN.arff data and MajorityClassClassifier
         MajorityClassClassifier mc= new MajorityClassClassifier();

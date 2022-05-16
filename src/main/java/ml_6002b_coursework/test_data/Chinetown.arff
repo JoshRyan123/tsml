@@ -51,7 +51,7 @@
 @attribute att22 numeric
 @attribute att23 numeric
 @attribute att24 numeric
-@attribute  target {1,2}
+@attribute target {1,2}
 
 @data
 501.0,328.0,195.0,218.0,67.0,17.0,28.0,72.0,132.0,215.0,406.0,765.0,1207.0,1427.0,1234.0,1238.0,1107.0,1190.0,1255.0,1144.0,905.0,690.0,386.0,192.0,1

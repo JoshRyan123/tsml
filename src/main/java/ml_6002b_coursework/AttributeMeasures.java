@@ -13,27 +13,30 @@ import java.text.DecimalFormat;
 public class AttributeMeasures {
     // Should follow formula shown in lecture 2, and comment code to indicate edge cases
 
-    // returns info gain for contingency table
+    // returns WEIGHTED info gain (entropy) for contingency table
     static double measureInformationGainRatio(int[][] table) {
         double Entropy;
-        double Bag[];
-        double Class[];
+        double Bag[] = new double [table.length];
+        double Class[] = new double [table[0].length];
         double total = 0;
         double oldEntropy = 0;
-        double newEntropy = 0;
+        double splitEntropy = 0;
         int i, j;
 
-        Bag = new double [table.length];
-        Class = new double [table[0].length];
         // iterate through rows (attribute values) in contingency table
         for (i = 0; i < table.length; i++) {
             // iterate through columns (class values) of contingency table
             for (j = 0; j < table[i].length; j++) {
                 Bag[i] += table[i][j];
                 Class[j] += table[i][j];
-                total = total + table[i][j];
+                total += table[i][j];
+                //System.out.println("Bag i: "+Bag[i]);
+                //System.out.println("Class j: "+Class[j]);
             }
         }
+//        for (i = 0; i < Class.length; i++) {
+//            System.out.println("class counts: "+ Class[i]);
+//        }
 
         double oldValue = 0;
         int p;
@@ -41,24 +44,32 @@ public class AttributeMeasures {
             oldValue = oldValue + logFunc(Class[p]);
             //System.out.println("log function old value"+logFunc(Class[p]));
         }
+        // calculate old entropy
         oldEntropy = oldEntropy+(logFunc(total)-oldValue);
+        // System.out.println("old entropy: "+oldEntropy);
 
         double newValue = 0;
         int k,o;
         for (k=0;k<Bag.length;k++){
             for (o=0;o<Class.length;o++)
                 newValue = newValue+logFunc(table[k][o]);
+                // deal with NaN calculations in entropy
+                if (Double.isNaN(newValue))
+                    newValue = 0;
             //System.out.println("log function new value"+logFunc(Bag[k]));
             newValue = newValue-logFunc(Bag[k]);
         }
-        newEntropy = newEntropy-newValue;
+        // calculate split entropy
+        splitEntropy -= newValue;
 
-        Entropy = oldEntropy-newEntropy;
+        // calculate total entropy
+        Entropy = oldEntropy-splitEntropy;
 
-        // Splits with no gain are useless.
+        // splits with no gain are useless
         if (Utils.eq(Entropy,0))
             return Double.MAX_VALUE;
 
+        // calculate weighted gain
         return total/Entropy;
     }
     public static final double logFunc(double num) {
@@ -75,122 +86,169 @@ public class AttributeMeasures {
         // entropy is 1 as 50/50 split (base entropy)
         int k, p;
         double total = 0;
-        double [] classCounts = new double[table.length];
+        double [] classCounts = new double[table[0].length];
+        double parentEnt = 0;
+        double childEnt = 0;
 
-        for (k = 0; k < classCounts.length; k++) {
+        // iterate through rows (attribute values) in contingency table
+        for (k = 0; k < table.length; k++) {
+            // iterate through columns (class values) of contingency table
             for (p = 0; p < table[k].length; p++) {
-                classCounts[k] = table[0][k]+table[1][k];
+                classCounts[p] += table[k][p];
                 total += table[k][p];
             }
         }
+//        for (k = 0; k < classCounts.length; k++) {
+//            System.out.println("class counts: "+ classCounts[k]);
+//        }
 
         double baseEntropy = 0;
-        for (int j = 0; j < table.length; j++) {
-            if (classCounts[j] > 0) {
-                baseEntropy -= classCounts[j] * Utils.log2(classCounts[j]);
-            }
+        for (int j = 0; j < classCounts.length; j++) {
+            baseEntropy = baseEntropy + logFunc(classCounts[j]);
         }
-        baseEntropy /= total;
-        baseEntropy += Utils.log2(total);
-        // System.out.println("starting entropy: "+baseEntropy);
+        parentEnt = parentEnt+(logFunc(total)-baseEntropy);
+        parentEnt /= total;
+        // System.out.println("parentEnt:"+parentEnt);
 
         // set info gain equal to starting entropy
-        double infoGain = baseEntropy;
-        double probability = 0;
+        double splitDist;
         int i, j;
-        // iterate through rows (attribute values) in contingency table
         for (i = 0; i < table.length; i++) {
-            // iterate through columns (class values) of contingency table
-            for (j = 0; j < table[i].length; j++) {
-                probability = (double) (table[i][j]) /
-                        ((table[i][0]+table[i][1]));
-                infoGain -=  (probability * logFunc(probability));
-//                System.out.println("probability:"+probability);
-//                System.out.println("log function: "+logFunc(probability));
-//                System.out.println("infogain: "+infoGain);
+            for (j = 0; j < classCounts.length; j++) {
+                // take individual row count and divide by weighting for whole row
+                splitDist = (double) (table[i][j]) /
+                        ((Utils.sum(table[i])));
+                // deal with NaN calculations in entropy
+                if (Double.isNaN(splitDist))
+                    splitDist = 0;
+                childEnt -=  (splitDist * logFunc(splitDist));
+//                System.out.println("split distribution:"+splitDist);
+//                System.out.println("log distribution: "+logFunc(splitDist));
+//                System.out.println("resultsing childENt: "+childEnt);
             }
         }
+        //System.out.println("childEnt: "+childEnt);
+        double infoGain = parentEnt-childEnt;
+//        System.out.println("parent ent: "+parentEnt);
+//        System.out.println("parent ent minus child ent: "+infoGain);
+//        double newValue = 0;
+//        int k,o;
+//        for (k=0;k<Bag.length;k++){
+//            for (o=0;o<Class.length;o++)
+//                newValue = newValue+logFunc(table[k][o]);
+//            // deal with NaN calculations in entropy
+//            if (Double.isNaN(newValue))
+//                newValue = 0;
+//            //System.out.println("log function new value"+logFunc(Bag[k]));
+//            newValue = newValue-logFunc(Bag[k]);
+//        }
+//        // calculate split entropy
+//        splitEntropy -= newValue;
         return infoGain;
     }
 
     // returns gini measure for contingency table
     static double measureGini(int[][] table) {
-        double[] parentDistribution = new double[table.length];
-        double[][] childDistributions = new double[table.length][2];
+        double[][] t = new double[table.length][table[0].length];
 
         // entropy is 1 as 50/50 split (base entropy)
         int k, p;
-        double [] classCounts = new double[table.length];
+        double [] classCounts = new double[table[0].length];
 
-        for (k = 0; k < classCounts.length; k++) {
+        for (k = 0; k < table.length; k++) {
+            // iterate through columns (class values) of contingency table
             for (p = 0; p < table[k].length; p++) {
-                parentDistribution[k] = table[0][k]+table[1][k];
-                childDistributions[k][p] = table[k][p];
+                classCounts[p] += table[k][p];
+                t[k][p] = table[k][p];
+                // System.out.println(table[k][p]);
             }
         }
 
-        double totalWeight = Utils.sum(parentDistribution);
+        double totalWeight = Utils.sum(classCounts);
         if (totalWeight==0) return 0;
 
-        double leftWeight = Utils.sum(childDistributions[0]);
-        double rightWeight = Utils.sum(childDistributions[1]);
+        double leftWeight = Utils.sum(t[0]);
+        double rightWeight = Utils.sum(t[1]);
+        //System.out.println("left wight:"+leftWeight);
+        //System.out.println("right wight:"+rightWeight);
 
         double parentVal = 0;
-        for (int i=0; i<parentDistribution.length; i++) {
-            parentVal += (parentDistribution[i]/totalWeight)*(parentDistribution[i]/totalWeight);
+        for (int i=0; i<classCounts.length; i++) {
+            parentVal += (classCounts[i]/totalWeight)*(classCounts[i]/totalWeight);
         }
+        // parent impurity measure
         parentVal = 1-parentVal;
         // System.out.println("parent gini index: "+parentVal);
+
         double leftVal = 0;
-        for (int i=0; i<childDistributions[0].length; i++) {
-            leftVal += (childDistributions[0][i]/leftWeight)*(childDistributions[0][i]/leftWeight);
-        }
-        leftVal = 1-leftVal;
+            for (int i = 0; i < t[0].length; i++) {
+                leftVal += (t[0][i] / leftWeight) * (t[0][i] / leftWeight);
+                //System.out.println("childDistributions[0][i] / leftWeight = " +leftVal);
+                // deal with NaN calculations in left gini value
+                if (Double.isNaN(leftVal))
+                    leftVal = 0;
+            }
+            leftVal = 1-leftVal;
+
+
         // System.out.println("left gini index: "+leftVal);
+
         double rightVal = 0;
-        for (int i=0; i<childDistributions[1].length; i++) {
-            rightVal += (childDistributions[1][i]/rightWeight)*(childDistributions[1][i]/rightWeight);
+        for (int i=0; i<t[1].length; i++) {
+            rightVal += (t[1][i]/rightWeight)*(t[1][i]/rightWeight);
+            //System.out.println("childDistributions[1][i] / rightWeight = " +rightVal);
+            // deal with NaN calculations in right gini value
+            if (Double.isNaN(rightVal))
+                rightVal = 1;
         }
         rightVal = 1-rightVal;
+
         // System.out.println("right gini index: "+rightVal);
 
+        //System.out.println("final parent val:"+childDistributions[1][1]+" "+childDistributions[1][0]);
+        //System.out.println("final left val:"+leftVal);
+        //System.out.println("final right val:"+rightVal);
+
+        // 1 - 0.5 - 0.72 - 1
         return parentVal - leftWeight/totalWeight*leftVal - rightWeight/totalWeight*rightVal;
     }
 
     // returns chi statistic for contingency table
     static double measureChiSquared(int[][] table) {
-        double chiSquaredStatistic = 0;
+        double chiSquaredStatistic;
 
-        double[] parentDistribution = new double[table.length];
-        double[][] childDistributions = new double[table.length][2];
+        double[][] t = new double[table.length][table[0].length];
 
         // entropy is 1 as 50/50 split (base entropy)
         int k, p;
-        double [] classCounts = new double[table.length];
-        for (k = 0; k < classCounts.length; k++) {
+        double [] classCounts = new double[table[0].length];
+        for (k = 0; k < table.length; k++) {
+            // iterate through columns (class values) of contingency table
             for (p = 0; p < table[k].length; p++) {
-                parentDistribution[k] = table[0][k]+table[1][k];
-                childDistributions[k][p] = table[k][p];
+                classCounts[p] += table[k][p];
+                t[k][p] = table[k][p];
+                // System.out.println(table[k][p]);
             }
         }
+        // System.out.println("parent distribution: "+ parentDistribution[0]+" "+parentDistribution[1]);
 
-        double totalWeight = Utils.sum(parentDistribution);
-        double leftWeight = Utils.sum(childDistributions[0]);
-        double rightWeight = Utils.sum(childDistributions[1]);
+        double totalWeight = Utils.sum(classCounts);
+        double leftWeight = Utils.sum(t[0]);
+        double rightWeight = Utils.sum(t[1]);
         if (totalWeight==0) return 0;
 
         // expected probabilies left: expectedProbabilities[0]
         // expected probabilies right: expectedProbabilities[1]
         // get expected probabilities from parent distribution and total parent weight
-        double[] expectedProbabilities = new double[parentDistribution.length];
+        double[] expectedProbabilities = new double[classCounts.length];
         // expected left is total left over each left varaible
-        double[] expectedLeftSplit = new double[parentDistribution.length];
-        double[] actualLeftSplit = new double[parentDistribution.length];
-        double[] expectedRightSplit = new double[parentDistribution.length];
-        double[] actualRightSplit = new double[parentDistribution.length];
+        double[] expectedLeftSplit = new double[classCounts.length];
+        double[] actualLeftSplit = new double[classCounts.length];
+        double[] expectedRightSplit = new double[classCounts.length];
+        double[] actualRightSplit = new double[classCounts.length];
         int i;
         for (i = 0; i < expectedProbabilities.length; i++) {
-            expectedProbabilities[i] = parentDistribution[i]/totalWeight;
+            expectedProbabilities[i] = classCounts[i]/totalWeight;
         }
 
         // expected equal to total left multiplied by expected distribution
@@ -210,13 +268,20 @@ public class AttributeMeasures {
         }
 
         // calculate statistics
-        double[] statisticsRight = new double[parentDistribution.length*2];
+        double[] statisticsRight = new double[classCounts.length*2];
         for (i = 0; i < actualRightSplit.length; i++) {
             statisticsRight[i] = (Math.pow(actualRightSplit[i], 2)-Math.pow(expectedRightSplit[i], 2))/expectedRightSplit[i];
+            // deal with NaN calculations in right chi squared statistics
+            if (Double.isNaN(statisticsRight[i]))
+                statisticsRight[i] = 0;
+
         }
-        double[] statisticsLeft = new double[parentDistribution.length*2];
+        double[] statisticsLeft = new double[classCounts.length*2];
         for (i = 0; i < actualRightSplit.length; i++) {
             statisticsLeft[i] = (Math.pow(actualLeftSplit[i], 2)-Math.pow(expectedLeftSplit[i], 2))/expectedLeftSplit[i];
+            // deal with NaN calculations in left chi squared statistics
+            if (Double.isNaN(statisticsLeft[i]))
+                statisticsLeft[i] = 0;
         }
         chiSquaredStatistic = Utils.sum(statisticsLeft)+Utils.sum(statisticsRight);
 
@@ -274,9 +339,9 @@ public class AttributeMeasures {
         // ie : 5/6 and 1/6
         // and: 4/4 and 4/0 (pure)
         // then find the effect (info gain) that node had
-        DecimalFormat df=new DecimalFormat("##.######");
+        DecimalFormat df=new DecimalFormat("##.#####");
         double infoGain = measureInformationGain(Peaty);
-        System.out.println(" Measure Information Gain for Peaty = "+df.format(1/infoGain));
+        System.out.println(" Measure Information Gain for Peaty = "+df.format(infoGain));
         double infoGainRatio = measureInformationGainRatio(Peaty);
         System.out.println(" Measure Information Gain Ratio for Peaty = "+df.format(1/infoGainRatio));
         double giniIndex = measureGini(Peaty);

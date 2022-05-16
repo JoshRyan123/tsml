@@ -8,9 +8,9 @@ import weka.core.Instances;
 import java.util.Enumeration;
 
 //  Implement and test the skeleton class IGAttributeSplitMeasure
-public class IGAttributeSplitMeasure extends AttributeSplitMeasure {
+public class ChiSquaredAttributeSplitMeasure extends AttributeSplitMeasure {
     // The choice of measure should be controlled by a boolean variable called useGain
-    public boolean useGain;
+    private boolean useGain;
 
     // split is performed using information gain or information gain ratio
     @Override
@@ -22,14 +22,13 @@ public class IGAttributeSplitMeasure extends AttributeSplitMeasure {
             return 0.0;
         }
 
-        int[][] table = new int[att.numValues()][data.numClasses()];
-
+        int[][] table = new int[(int) att.numValues()][data.numClasses()];
         int k;
         int trueAttIndex = 0;
         for (k = 0; k < data.numAttributes(); k++) {
             if (data.attribute(k).name()==att.name()) {
                 trueAttIndex = k;
-                //System.out.println("true value of k (index of attribute passed):"+k);
+                // System.out.println("true value of k (index of attribute passed):"+k);
             }
         }
         for(Instance ins:data){
@@ -42,17 +41,9 @@ public class IGAttributeSplitMeasure extends AttributeSplitMeasure {
 //            System.out.print("\n");
 //        }
 
-        double measure;
-        if (useGain == true) {
-            measure = am.measureInformationGain(table);
-            // System.out.println("measure Information Gain for attribute "+att.name()+" splitting diagnosis = " + measure);
-            return measure;
-        }
-        else {
-            measure = am.measureInformationGainRatio(table);
-            // System.out.println("measure Information Gain Ratio for attribute "+ att.name() + " splitting diagnosis = " + 1/measure);
-            return 1/measure;
-        }
+        double measure = am.measureChiSquared(table);
+
+        return measure;
     }
 
     /**
@@ -63,20 +54,14 @@ public class IGAttributeSplitMeasure extends AttributeSplitMeasure {
     public static void main(String[] args) throws Exception {
         Instances data = DatasetLoading.loadData("src\\main\\java\\ml_6002b_coursework\\test_data\\Whiskey.arff");
 
-        IGAttributeSplitMeasure ig = new IGAttributeSplitMeasure();
-        ig.useGain = false;
+        ChiSquaredAttributeSplitMeasure cs = new ChiSquaredAttributeSplitMeasure();
 
-        double[] infoGains = new double[data.numAttributes() - 1];
+        double[] chiSquaredStatistics = new double[data.numAttributes()-1];
         Enumeration attEnum = data.enumerateAttributes();
         while (attEnum.hasMoreElements()) {
             Attribute att = (Attribute) attEnum.nextElement();
-            infoGains[att.index()] = ig.computeAttributeQuality(data, att);
-            if (ig.useGain == true) {
-                System.out.println("measure Information Gain for attribute "+att.name()+" splitting diagnosis = " + infoGains[att.index()]);
-            }
-            else {
-                System.out.println("measure Information Gain Ratio for attribute "+ att.name() + " splitting diagnosis = " + infoGains[att.index()]);
-            }
+            chiSquaredStatistics[att.index()] = cs.computeAttributeQuality(data, att);
+            System.out.println("measure Chi-Squared Statistic for attribute " +att.name()+ " splitting diagnosis = "+chiSquaredStatistics[att.index()]);
         }
     }
 }

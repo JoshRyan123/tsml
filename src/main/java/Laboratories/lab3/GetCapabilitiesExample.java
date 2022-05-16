@@ -4,7 +4,7 @@ import weka.classifiers.AbstractClassifier;
 import weka.core.Capabilities;
 import weka.core.Instances;
 
-public class DummyClassifier extends AbstractClassifier {
+public class GetCapabilitiesExample extends AbstractClassifier {
     double[] classDistribution;
 
     @Override

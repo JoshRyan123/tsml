@@ -30,7 +30,7 @@ public class LiveClassDecisionTrees {
         J48 c45 = new J48(); //(c4.5)
         Id3 id3 = new Id3();
 
-        System.out.println(" Base class capabilities = "+ new DummyClassifier().getCapabilities());
+        System.out.println(" Base class capabilities = "+ new GetCapabilitiesExample().getCapabilities());
 
         System.out.println(" C45 capabilities = "+c45.getCapabilities());
         System.out.println(" ID3 capabilities = "+id3.getCapabilities());
