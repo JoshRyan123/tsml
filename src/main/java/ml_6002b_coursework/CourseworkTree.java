@@ -44,7 +44,7 @@ public class CourseworkTree extends AbstractClassifier {
      */
     public void setMaxDepth(int maxDepth){
         this.maxDepth = maxDepth;
-        System.out.println("Max Depth: "+maxDepth+"\n");
+        //System.out.println("Max Depth: "+maxDepth+"\n");
     }
 
     /**
