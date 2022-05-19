@@ -61,10 +61,6 @@ public class LiveEnsemble {
 
 
         // additionally should check out adaboost
-
-
-
-
         int countC45 = 0;
         int countBagging = 0;
         int countEns = 0;
@@ -103,10 +99,5 @@ public class LiveEnsemble {
 
         //System.out.println(bagging.toString());
         System.out.println(randForest.getNumFeatures());
-
-
-
-
-
     }
 }

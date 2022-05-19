@@ -62,9 +62,11 @@ public class IGAttributeSplitMeasure extends AttributeSplitMeasure {
      */
     public static void main(String[] args) throws Exception {
         Instances data = DatasetLoading.loadData("src\\main\\java\\ml_6002b_coursework\\test_data\\Whiskey.arff");
+        //Instances data = DatasetLoading.loadData("C:\\Work\\GitHub\\tsml\\Data\\Labs\\PlayGolf\\PlayGolf.arff");
+        //Instances data = DatasetLoading.loadData("src\\main\\java\\ml_6002b_coursework\\test_data\\optdigits.arff");
 
         IGAttributeSplitMeasure ig = new IGAttributeSplitMeasure();
-        ig.useGain = true;
+        ig.useGain = false;
 
         double[] infoGains = new double[data.numAttributes() - 1];
         Enumeration attEnum = data.enumerateAttributes();

@@ -65,26 +65,37 @@ public abstract class AttributeSplitMeasure {
         for (Instance inst: data) {
             inst.value(trueAttIndex);
             totalSumAttValues += inst.value(trueAttIndex);
-            // System.out.println("this attributes instance value for instance: "+j+" "+inst.value(j));
+            //System.out.println("this attributes instance value for instance: "+inst+" ///// "+inst.value(trueAttIndex));
         }
-        //System.out.println("total for attribute " + trueAttIndex +":"+ totalSumAttValues);
-        //System.out.println("Even splitValue: "+ totalSumAttValues/data.numInstances());
+        //System.out.println("\n\n\n\n\n total for attribute " + trueAttIndex +":"+ totalSumAttValues);
+        //System.out.println("splitValue: "+ totalSumAttValues/data.numInstances()+"\n\n\n\n\n\n");
 
+        // find average value seen for the split value
         int splitValue = totalSumAttValues/data.numInstances();
 
         // iterate through instances in data binning values for the given attribute
         for(Instance ins:data){
             // above split value (1)
             if (ins.value(trueAttIndex) >= splitValue) {
+                //System.out.println("\n\n\n instance value: "+ins.value(trueAttIndex));
+                //System.out.println("attribute index value: "+trueAttIndex);
+                //System.out.println("splitValue: "+splitValue);
                 ins.setValue(trueAttIndex, 1);
+                // System.out.println("Value after binning: "+ 1);
+
             }
+            // below split value (0)
             else if (ins.value(trueAttIndex) < splitValue) {
-                // below split value (0)
+                //System.out.println("\n\n\ninstance value: "+ins.value(trueAttIndex));
+                //System.out.println("attribute index value: "+trueAttIndex);
+                //System.out.println("splitValue: "+splitValue);
                 ins.setValue(trueAttIndex, 0);
+                //System.out.println("Value after binning: "+ 0);
             }
             else {
                 break;
             }
+            // System.out.println("Value after binning should be: "+ (ins.value(trueAttIndex) > splitValue)+"\n\n\n");
         }
 
         //System.out.println(data);

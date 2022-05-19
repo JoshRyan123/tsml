@@ -44,6 +44,7 @@ public class CourseworkTree extends AbstractClassifier {
      */
     public void setMaxDepth(int maxDepth){
         this.maxDepth = maxDepth;
+        System.out.println("Max Depth: "+maxDepth+"\n");
     }
 
     /**
@@ -147,6 +148,12 @@ public class CourseworkTree extends AbstractClassifier {
         void buildTree(Instances data, int depth) throws Exception {
             this.depth = depth;
 
+            // 0.1 some sort of stopping condition
+            // Check if no instances have reached this node.
+            if (data.numInstances() == 0 || depth == maxDepth) {
+                return;
+            }
+
             // Choosing an attribute
             // 1. Loop through each attribute, finding the best one.
             for (int i = 0; i < data.numAttributes() - 1; i++) {
@@ -204,6 +211,7 @@ public class CourseworkTree extends AbstractClassifier {
         void buildLeaf(Instances data, int depth) {
             this.depth = depth;
             leafDistribution = classDistribution(data);
+//            System.out.println("built leaf: \n with depth: "+depth);
         }
 
         /**
@@ -275,7 +283,7 @@ public class CourseworkTree extends AbstractClassifier {
 
         // Discretize Numeric Values in dataset
         AttributeSplitMeasure am = new IGAttributeSplitMeasure();
-        for (int k = 0; k < numeric.numAttributes(); k++) {
+        for (int k = 0; k < numeric.numAttributes()-1; k++) {
             numeric = am.splitDataOnNumeric(numeric, numeric.attribute(k));
         }
         //System.out.println(numeric);
@@ -384,8 +392,6 @@ public class CourseworkTree extends AbstractClassifier {
 
             //actual result
             double actual = i.classValue();
-            //System.out.println(i);
-            //System.out.println(actual);
 
             // check predictions
             if(predictedChiOptdigits==actual)
@@ -417,10 +423,8 @@ public class CourseworkTree extends AbstractClassifier {
             double predictedInfoGainRatioChinetown = treeIGRChinetown.classifyInstance(i);
             double predictedGiniChinetown = treeGiniChinetown.classifyInstance(i);
 
-            //actual result (converted from {1 ,2} to {0, 1})
+            // Result converted from {1 ,2} to {0, 1} for the predictions
             double actual = i.classValue();
-//            System.out.println(i);
-//            System.out.println(actual);
 //            System.out.println("   Chi Predicted = "+predictedChiChinetown);
 //            System.out.println("   InfoGain Predicted = "+predictedInfoGainChinetown);
 //            System.out.println("   InfoGainRatio Predicted = "+predictedInfoGainRatioChinetown);
@@ -452,6 +456,7 @@ public class CourseworkTree extends AbstractClassifier {
         tmpStr = Utils.getOption("depth", options);
         if (tmpStr.length() != 0) {
             setMaxDepth(Integer.parseInt(tmpStr));
+            // System.out.println("depth: "+tmpStr);
         } else {
             setMaxDepth(1);
         }
