@@ -118,6 +118,50 @@ public class CourseworkTree extends AbstractClassifier {
     }
 
     /**
+     * sets parameters of the decision tree.
+     */
+    public void setOptions(String[] options) throws Exception {
+        String tmpStr;
+
+        tmpStr = Utils.getOption("d", options);
+        if (tmpStr.length() != 0) {
+            setMaxDepth(Integer.parseInt(tmpStr));
+            // System.out.println("depth: "+tmpStr);
+        } else {
+            setMaxDepth(1);
+        }
+
+        tmpStr = Utils.getOption("c", options);
+        if (tmpStr.length() != 0) {
+            ChiSquaredAttributeSplitMeasure chi = new ChiSquaredAttributeSplitMeasure();
+            setAttSplitMeasure(chi);
+        }
+
+        tmpStr = Utils.getOption("g", options);
+        if (tmpStr.length() != 0) {
+            IGAttributeSplitMeasure ig = new IGAttributeSplitMeasure();
+            ig.useGain = true;
+            setAttSplitMeasure(ig);
+        }
+
+        tmpStr = Utils.getOption("i", options);
+        if (tmpStr.length() != 0) {
+            GiniAttributeSplitMeasure gini = new GiniAttributeSplitMeasure();
+            setAttSplitMeasure(gini);
+        }
+
+        tmpStr = Utils.getOption("r", options);
+        if (tmpStr.length() != 0) {
+            IGAttributeSplitMeasure ig = new IGAttributeSplitMeasure();
+            ig.useGain = false;
+            setAttSplitMeasure(ig);
+        }
+
+        super.setOptions(options);
+        Utils.checkForRemainingOptions(options);
+    }
+
+    /**
      * Class representing a single node in the tree.
      */
     private class TreeNode {
@@ -148,7 +192,7 @@ public class CourseworkTree extends AbstractClassifier {
         void buildTree(Instances data, int depth) throws Exception {
             this.depth = depth;
 
-            // 0.1 some sort of stopping condition
+            // 0.3 some sort of stopping condition
             // Check if no instances have reached this node.
             if (data.numInstances() == 0 || depth == maxDepth) {
                 return;
@@ -161,6 +205,7 @@ public class CourseworkTree extends AbstractClassifier {
 
                 if (gain > bestGain) {
                     bestSplit = data.attribute(i);
+                    //System.out.println("best gain: "+gain);
                     bestGain = gain;
                 }
             }
@@ -304,24 +349,24 @@ public class CourseworkTree extends AbstractClassifier {
 
         // initialize info gain trees
         CourseworkTree treeIGOptdigits = new CourseworkTree();
-        treeIGOptdigits.setOptions(Utils.splitOptions("-gain 1 -depth 3"));
+        treeIGOptdigits.setOptions(Utils.splitOptions("-g 1 -d 3"));
         CourseworkTree treeIGChinetown = new CourseworkTree();
-        treeIGChinetown.setOptions(Utils.splitOptions("-gain 1 -depth 3"));
+        treeIGChinetown.setOptions(Utils.splitOptions("-g 1 -d 3"));
         // initialize info gain ratio trees
         CourseworkTree treeIGROptdigits = new CourseworkTree();
-        treeIGROptdigits.setOptions(Utils.splitOptions("-ratio 1 -depth 3"));
+        treeIGROptdigits.setOptions(Utils.splitOptions("-r 1 -d 3"));
         CourseworkTree treeIGRChinetown = new CourseworkTree();
-        treeIGRChinetown.setOptions(Utils.splitOptions("-ratio 1 -depth 3"));
+        treeIGRChinetown.setOptions(Utils.splitOptions("-r 1 -d 3"));
         // initialize chi squared statistic trees
         CourseworkTree treeChiOptdigits = new CourseworkTree();
-        treeChiOptdigits.setOptions(Utils.splitOptions("-chi 1 -depth 3"));
+        treeChiOptdigits.setOptions(Utils.splitOptions("-c 1 -d 3"));
         CourseworkTree treeChiChinetown = new CourseworkTree();
-        treeChiChinetown.setOptions(Utils.splitOptions("-chi 1 -depth 3"));
+        treeChiChinetown.setOptions(Utils.splitOptions("-c 1 -d 3"));
         // initialize gini index trees
         CourseworkTree treeGiniOptdigits = new CourseworkTree();
-        treeGiniOptdigits.setOptions(Utils.splitOptions("-gini 1 -depth 3"));
+        treeGiniOptdigits.setOptions(Utils.splitOptions("-i 1 -d 3"));
         CourseworkTree treeGiniChinetown = new CourseworkTree();
-        treeGiniChinetown.setOptions(Utils.splitOptions("-gini 1 -depth 3"));
+        treeGiniChinetown.setOptions(Utils.splitOptions("-i 1 -d 3"));
 
         // get random split nominal
 //        Random r1 = new Random();
@@ -449,46 +494,4 @@ public class CourseworkTree extends AbstractClassifier {
         System.out.println("DT using measure Information Gain Ratio on chinetown problem has test accuracy: "+ infoGainRatioChinetownCount/(double)splitNumeric[1].numInstances());
         System.out.println("DT using measure Gini Index on chinetown problem has test accuracy: "+ giniChinetownCount/(double)splitNumeric[1].numInstances());
     }
-
-    public void setOptions(String[] options) throws Exception {
-        String tmpStr;
-
-        tmpStr = Utils.getOption("depth", options);
-        if (tmpStr.length() != 0) {
-            setMaxDepth(Integer.parseInt(tmpStr));
-            // System.out.println("depth: "+tmpStr);
-        } else {
-            setMaxDepth(1);
-        }
-
-        tmpStr = Utils.getOption("chi", options);
-        if (tmpStr.length() != 0) {
-            ChiSquaredAttributeSplitMeasure chi = new ChiSquaredAttributeSplitMeasure();
-            setAttSplitMeasure(chi);
-        }
-
-        tmpStr = Utils.getOption("gain", options);
-        if (tmpStr.length() != 0) {
-            IGAttributeSplitMeasure ig = new IGAttributeSplitMeasure();
-            ig.useGain = true;
-            setAttSplitMeasure(ig);
-        }
-
-        tmpStr = Utils.getOption("gini", options);
-        if (tmpStr.length() != 0) {
-            GiniAttributeSplitMeasure gini = new GiniAttributeSplitMeasure();
-            setAttSplitMeasure(gini);
-        }
-
-        tmpStr = Utils.getOption("ratio", options);
-        if (tmpStr.length() != 0) {
-            IGAttributeSplitMeasure ig = new IGAttributeSplitMeasure();
-            ig.useGain = false;
-            setAttSplitMeasure(ig);
-        }
-
-        super.setOptions(options);
-        Utils.checkForRemainingOptions(options);
-    }
-
 }

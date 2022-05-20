@@ -8,15 +8,16 @@ import scala.tools.nsc.transform.patmat.Logic;
 import utilities.InstanceTools;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
+import weka.classifiers.meta.FilteredClassifier;
 import weka.classifiers.trees.RandomForest;
-import weka.core.Capabilities;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Utils;
+import weka.core.*;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.NumericToNominal;
+import weka.filters.unsupervised.attribute.Remove;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Random;
 
 /**
@@ -34,14 +35,14 @@ public class TreeEnsemble extends AbstractClassifier{
 
     int numTrees=50;
 
-    int attributeSelectionSize=50;  //50%
+    int attributeSelectionSize=20;  // 20%
 
     // Homogenious array of dt's
     ArrayList<CourseworkTree> treeEnsemble;
 
     // Store which attributes are used with which classifier in order to recreate the attribute selections
     // in classifyInstance and distributionForInstance
-    int[][] attributeBags;
+    String[] attributeBags;
 
     boolean averageDistributions;
 
@@ -76,23 +77,23 @@ public class TreeEnsemble extends AbstractClassifier{
 
         // array of [ratio 1, gain 1, chi 1, gini 1] for attribute selection mechanism
         String[] attributeSelectionOptions = new String[4];
-        attributeSelectionOptions[0] = "-gini 1";
-        attributeSelectionOptions[1] = "-gain 1";
-        attributeSelectionOptions[2] = "-chi 1";
-        attributeSelectionOptions[3] = "-ratio 1";
+        attributeSelectionOptions[0] = "-g 1";
+        attributeSelectionOptions[1] = "-i 1";
+        attributeSelectionOptions[2] = "-c 1";
+        attributeSelectionOptions[3] = "-r 1";
 //        for(int i=0;i<attributeSelectionOptions.length;i++) {
 //            System.out.println(attributeSelectionOptions[i]);
 //        }
 
-        // random number between 1 and 150
+        // random number between 1 and 50 for depth
         String[] depthOptions = new String[data.numAttributes()-1];
         Random rn = new Random();
         for (int j = 0; j < depthOptions.length; j++) {
             // Obtain a number between [0 - 49] so increment the result
-            int depth = rn.nextInt(50);
+            int depth = rn.nextInt(5);
             depth++;
             String temp = Integer.toString(depth);
-            depthOptions[j] = "-depth "+temp;
+            depthOptions[j] = "-d "+temp;
             //System.out.println(depthOptions[j]);
         }
 
@@ -118,37 +119,70 @@ public class TreeEnsemble extends AbstractClassifier{
             treeEnsemble.add(c);
         }
 
+        // remove instances with missing class
+        data = new Instances(data);
+        data.deleteWithMissingClass();
+
+        // get the size of the subspace (calculates number of attributes for new dataset
+        // equal to te number of attributes wanting to remove
+        double subSpaceSize = Math.round(((double)data.numAttributes()-1)*(((double)attributeSelectionSize/(double)100)));
+        //System.out.println("subspacesize: "+subSpaceSize);
+        int intSpaceSize = (int) subSpaceSize;
+        //System.out.println(intSpaceSize);
+
+        //attribute bag for every classifier
+        attributeBags = new String[numTrees];
+
         int bagIndex = 0;
-        for (CourseworkTree c : treeEnsemble) {
-            // Method 2: selecting an attribute subset of the data; diversity through changing the data.
-            //       -   attribute subsets stored internally by the Ensemble in attributeBags 2D array
+        // build for every classifer
+        for (int j = 0; j < numTrees; j++) {
+                // Method 2: selecting an attribute subset of the data; diversity through changing the data.
+                //       -   attribute subsets stored internally by the Ensemble in attributeBags 2D array
 
-            // initialise array of size equal to te number of attributes multiplied by the attribute selection value
-            // (attribute selection value / 100 for proportion of attributes to select from the data )
-            int[] attributeBag = new int[(data.numAttributes()-1)*(attributeSelectionSize/100)];
+                Integer[] indices = new Integer[data.numAttributes()-1];    // get array of size equal to attributes to store their index'
+                int classIndex = data.classIndex();                         // get index of class
+                int offset = 0;
+                for(int i = 0; i < indices.length+1; i++) {                 // for all attributes and class value
+                    if (i != classIndex) {                                  // fill out indicies with the index'
+                        indices[offset++] = i+1;                            // for array of all attribute index'
+                    }
+                }
 
-            // select a random amount of ints (without replacement) from the number of attributes avaliable
+                // get random number calculator
+                Random random = new Random();
 
+                Collections.shuffle(Arrays.asList(indices), random);
+                StringBuffer sb = new StringBuffer("");
 
+                for (int i = 0; i < intSpaceSize; i++) {
+                    sb.append(indices[i] + ",");
+                }
+                sb.append(classIndex + 1);
+
+                // store in bags for access with classifyInstacne and distributionForInstance later
+                attributeBags[bagIndex] = sb.toString();
+                // System.out.println("Bag index: " + "(" + bagIndex + ")" + " Bag for classifer "+(bagIndex+1)+": " + attributeBags[bagIndex]);
+
+                Remove rm = new Remove();
+                rm.setOptions(new String[]{"-V", "-R", sb.toString()});
+
+                rm.setInputFormat(data);  // filter capabilities are checked here
+                Instances newData = Filter.useFilter(data, rm);
+
+                // build the classifier
+                treeEnsemble.get(j).buildClassifier(newData);
+                bagIndex++;
+        }
             // need to store attributes used in double[][] attributeBags
             // store the array of attributes in the appropriate index of te attributeBags array
             //attributeBags[bagIndex] = attributeBag;
 
+            // remove the attributes(data with index's removed and concatenated)
 
             // create a new dataset only including class value and indexed in the current attribute bag
 
-
-            // build the current classifier on that dataset and do the same for the next classifier
-
-
-            // use tools or do it manually, gives classifiers different subset of the training data
-            //data.randomize(new Random());
-            //Instances train = new Instances(data, 0, data.numInstances() / 2);
-
+            // build the current classifier on that dataset and do the same for the next classifier with new bag index
             // build model on the above
-            c.buildClassifier(data);
-            bagIndex++;
-        }
     }
 
     // Count how many classifiers predict each class value, then return the class that receives the largest no.
@@ -180,7 +214,7 @@ public class TreeEnsemble extends AbstractClassifier{
         // average the probabilities
         if (averageDistributions) {
             double[] probs= new double[inst.numClasses()];
-            // for classifier c gets the probability estimate of each class value
+            // for classifier c gets the proportion of 'probability estimates' for each class value
             for(Classifier c:treeEnsemble){
                 //cast to int as classifyInstance returns double
                 double[] d = c.distributionForInstance(inst);
@@ -202,7 +236,7 @@ public class TreeEnsemble extends AbstractClassifier{
             return probs;
         }
         else {
-            // proportion of votes for each class
+            // proportion of 'votes' for each class
             double[] votes=new double[inst.numClasses()];
 
             // 1. ask each base classifier (ensemble members) for prediction and count predictions for each class
@@ -211,7 +245,7 @@ public class TreeEnsemble extends AbstractClassifier{
                 votes[(int)c.classifyInstance(inst)]++;
             }
 
-            // 2. return the proportion of votes for each class
+            // 2. return the proportion of votes for each label
             // Find total votes then divide individual votes by the total
             int total = 0;
             for(int i=0;i<votes.length;i++) {
@@ -253,79 +287,117 @@ public class TreeEnsemble extends AbstractClassifier{
         TreeEnsemble treeEnsembleNom = new TreeEnsemble();
         treeEnsembleNom.buildClassifier(nominal);
         TreeEnsemble treeEnsembleNum = new TreeEnsemble();
-        //treeEnsembleNum.buildClassifier(numeric);
-
+        treeEnsembleNum.buildClassifier(numeric);
 
         // test nominal
         int countNom = 0;
-        for(Instance inst: nominal){
+        int totalNom = 0;
+        int tests = 1;
+        for(int k = 0; k < treeEnsembleNom.numTrees; k++) {
             // need to store which attributes are used with which classifier (attributeBags[][]) in order to
             // recreate the attribute selections
+            // get random number calculator
+            Random random = new Random();
+            StringBuffer sb = new StringBuffer("");
+            sb.append(treeEnsembleNom.attributeBags[k]);
 
+            Remove rm = new Remove();
+            rm.setOptions(new String[]{"-V", "-R", sb.toString()});
 
+            rm.setInputFormat(nominal);  // filter capabilities are checked here
+            Instances newData = Filter.useFilter(nominal, rm);
 
-            //int pred = (int)treeEnsembleNom.classifyInstance(inst);
-            int actual = (int)inst.classValue();
-            //if(pred==actual){
-            //    countNom++;
-            //}
+            //System.out.println("\n"+sb.toString());
+            //System.out.println("\n\n"+newData);
 
+            int classifierAccuracy = 0;
+            for (Instance inst : newData) {
+                int pred = (int) treeEnsembleNom.treeEnsemble.get(k).classifyInstance(inst);
+                int actual = (int) inst.classValue();
+                if(pred==actual){
+                    countNom++;
+                    classifierAccuracy++;
+                }
+                totalNom++;
 
-            // print out nominal probability estimates for first 5 tests
-            treeEnsembleNom.setAverageDistributions(true);
-            //double[] dist1 = treeEnsembleNom.distributionForInstance(inst);
-            treeEnsembleNom.setAverageDistributions(false);
-            //double[] dist2 = treeEnsembleNom.distributionForInstance(inst);
-            int i = 1;
-            if (i < 6) {
-                //System.out.println("\n\nFor Nominal Test " + i + ":");
-                //for (int j=0; i<dist1.length; i++) {
-                //    System.out.println("Averaged distributions class ("+j+") = "+dist1[j]);
-                //}
-                //for (int j=0; i<dist2.length; i++) {
-                //    System.out.println("Proportion of votes class ("+j+") = "+dist2[j]);
-                //}
-                //i++;
+                // print out nominal probability estimates for first 5 tests
+                treeEnsembleNom.setAverageDistributions(true);
+                double[] dist1 = treeEnsembleNom.treeEnsemble.get(k).distributionForInstance(inst);
+                //System.out.println("distribution length: "+dist1.length);
+                treeEnsembleNom.setAverageDistributions(false);
+                double[] dist2 = treeEnsembleNom.treeEnsemble.get(k).distributionForInstance(inst);
+                if (tests < 6) {
+                    System.out.println("\n\nNominal Test "+tests+" using Classifier "+(k+1)+" on Instance " + tests + " of optdigits with attribute subset "+(k+1) +":");
+                    for (int j = 0; j < dist1.length; j++) {
+                        System.out.println("Averaged distributions for class (" + j + ") = " + dist1[j]);
+                    }
+                    for (int j = 0; j < dist2.length; j++) {
+                        System.out.println("Proportion of votes for class (" + j + ") = " + dist2[j]);
+                    }
+                    System.out.println("\n");
+                }
+                tests++;
             }
+            System.out.println("Nominal_Classifier_"+(k+1)+" test accuracy = " + (double) classifierAccuracy / (double) newData.numInstances());
         }
+
 
         // test numeric
         int countNum = 0;
-        for(Instance inst: numeric){
+        int totalNum = 0;
+        tests = 1;
+        for(int t = 0; t < treeEnsembleNum.numTrees; t++) {
             // need to store which attributes are used with which classifier (attributeBags[][]) in order to
             // recreate the attribute selections
+            // get random number calculator
+            Random random = new Random();
+            StringBuffer sb = new StringBuffer("");
+            sb.append(treeEnsembleNum.attributeBags[t]);
 
+            Remove rm = new Remove();
+            rm.setOptions(new String[]{"-V", "-R", sb.toString()});
 
+            rm.setInputFormat(numeric);  // filter capabilities are checked here
+            Instances newData = Filter.useFilter(numeric, rm);
 
-            //int pred = (int)treeEnsembleNum.classifyInstance(inst);
-            int actual = (int)inst.classValue();
-            //if(pred==actual){
-            //    countNum++;
-            //}
+            //System.out.println("\n"+sb.toString());
+            //System.out.println("\n\n"+newData);
 
+            int classifierAccuracy = 0;
+            for (Instance inst : newData) {
+                int pred = (int) treeEnsembleNum.treeEnsemble.get(t).classifyInstance(inst);
+                int actual = (int) inst.classValue();
+                if(pred==actual){
+                    countNum++;
+                    classifierAccuracy++;
+                }
+                totalNum++;
 
-            // print out numeric probability estimates for first 5 tests
-            //treeEnsembleNum.setAverageDistributions(true);
-            //double[] dist3 = treeEnsembleNum.distributionForInstance(numeric.instance(i));
-            //treeEnsembleNum.setAverageDistributions(false);
-            //double[] dist4 = treeEnsembleNum.distributionForInstance(numeric.instance(i));
-            int i = 1;
-            if (i < 6) {
-                //System.out.println("\n\nFor Numeric Test "+i+":");
-                //for (int j=0; i<dist3.length; i++) {
-                //    System.out.println("Averaged distributions class ("+j+") = "+dist3[j]);
-                //}
-                //for (int j=0; i<dist4.length; i++) {
-                //    System.out.println("Proportion of votes class ("+j+") = "+dist4[j]);
-                //}
-                //i++;
+                // print out nominal probability estimates for first 5 tests
+                treeEnsembleNum.setAverageDistributions(true);
+                double[] dist3 = treeEnsembleNum.treeEnsemble.get(t).distributionForInstance(inst);
+                //System.out.println("distribution length: "+dist1.length);
+                treeEnsembleNum.setAverageDistributions(false);
+                double[] dist4 = treeEnsembleNum.treeEnsemble.get(t).distributionForInstance(inst);
+                if (tests < 6) {
+                    System.out.println("\n\nNumeric Test "+tests+" using Classifier "+(t+1)+" on Instance " + tests + " of chinetown with attribute subset "+(t+1) +":");
+                    for (int j = 0; j < dist3.length; j++) {
+                        System.out.println("Averaged distributions for class (" + j + ") = " + dist3[j]);
+                    }
+                    for (int j = 0; j < dist4.length; j++) {
+                        System.out.println("Proportion of votes for class (" + j + ") = " + dist4[j]);
+                    }
+                    System.out.println("\n");
+                }
+                tests++;
             }
+            System.out.println("Numeric_Classifier_"+(t+1)+" test accuracy = " + (double) classifierAccuracy / (double) newData.numInstances());
         }
 
-        double numAccuracy  =  countNum / (double) numeric.numInstances();
-        double nomAccuracy  =  countNom / (double) nominal.numInstances();
+        double numAccuracy  =  (double) countNum / (double) totalNum;
+        double nomAccuracy  =  (double) countNom / (double) totalNom;
 
-        System.out.println("Numeric chinetown test accuracy: "+ numAccuracy);
-        System.out.println("Nominal optdigits test accuracy: "+ nomAccuracy);
+        System.out.println("\nNumeric_Ensemble test accuracy: "+ numAccuracy);
+        System.out.println("Nominal_Ensemble test accuracy: "+ nomAccuracy);
     }
 }

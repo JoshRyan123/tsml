@@ -435,15 +435,17 @@ public class RandomSubSpace
       if (m_Classifier instanceof Randomizable) {
 	((Randomizable) m_Classifiers[j]).setSeed(random.nextInt());
       }
+      // migrate classifier to filtered classifier
       FilteredClassifier fc = new FilteredClassifier();
       fc.setClassifier(m_Classifiers[j]);
       m_Classifiers[j] = fc;
+
       Remove rm = new Remove();
       rm.setOptions(new String[]{"-V", "-R", randomSubSpace(indices,subSpaceSize,classIndex+1,random)});
       fc.setFilter(rm);
 
       // build the classifier
-      //m_Classifiers[j].buildClassifier(m_data);
+      m_Classifiers[j].buildClassifier(m_data);
     }
     
     buildClassifiers();

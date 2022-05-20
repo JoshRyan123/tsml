@@ -710,6 +710,7 @@ public class RotationForest
     data = new Instances( data );
     super.buildClassifier(data);
 
+    // sets max group and min group
     checkMinMax(data);
 
     Random random;
@@ -721,10 +722,11 @@ public class RotationForest
       random = new Random(m_Seed);
     }
 
+    // remove useless attributes
     m_RemoveUseless = new RemoveUseless();
     m_RemoveUseless.setInputFormat(data);
     data = Filter.useFilter(data, m_RemoveUseless);
-  
+    // normalize data
     m_Normalize = new Normalize();
     m_Normalize.setInputFormat(data);
     data = Filter.useFilter(data, m_Normalize);
@@ -745,7 +747,8 @@ public class RotationForest
     int numClasses = data.numClasses();
 
     // Split the instances according to their class
-    Instances [] instancesOfClass = new Instances[numClasses + 1]; 
+    Instances [] instancesOfClass = new Instances[numClasses + 1];
+    // if class value is numeric use it as well
     if( data.classAttribute().isNumeric() ) {
       instancesOfClass = new Instances[numClasses]; 
       instancesOfClass[0] = data;
@@ -775,12 +778,20 @@ public class RotationForest
       }
     }
 
+
+
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     // These arrays keep the information of the transformed data set
+    // headers for the dataset as an array of instances objects
     m_Headers = new Instances[ m_Classifiers.length ];
+    // headers of the subset datasets as an array of an array of instances objects
     m_ReducedHeaders = new Instances[ m_Classifiers.length ][];
 
     // Construction of the base classifiers
     for(int i = 0; i < m_Classifiers.length; i++) {
+      // for all arrays in subset dataset headers initalise to be size of attributes of each group
       m_ReducedHeaders[i] = new Instances[ m_Groups[i].length ];
       FastVector transformedAttributes = new FastVector( data.numAttributes() );
 
@@ -870,6 +881,7 @@ public class RotationForest
       }
       m_Classifiers[i].buildClassifier( buildClas );
     }
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     if(m_Debug){
       printGroups();
