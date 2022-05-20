@@ -391,7 +391,7 @@ public class TreeEnsemble extends AbstractClassifier{
                 }
                 tests++;
             }
-            System.out.println("Numeric_Classifier_"+(t+1)+" test accuracy = " + (double) classifierAccuracy / (double) newData.numInstances());
+            System.out.println("Numeric_Classifier_"+(t+1)+"test accuracy = " + (double) classifierAccuracy / (double) newData.numInstances());
         }
 
         double numAccuracy  =  (double) countNum / (double) totalNum;
