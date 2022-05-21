@@ -194,7 +194,7 @@ public class CourseworkTree extends AbstractClassifier {
 
             // 0.3 some sort of stopping condition
             // Check if no instances have reached this node.
-            if (data.numInstances() == 0 || depth == maxDepth) {
+            if (data.numInstances() == 2 || depth == maxDepth) {
                 return;
             }
 
