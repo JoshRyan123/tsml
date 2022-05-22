@@ -117,6 +117,49 @@ public class CourseworkTree extends AbstractClassifier {
         return root.distributionForInstance(instance);
     }
 
+    /**
+     * sets parameters of the decision tree.
+     */
+    public void setOptions(String[] options) throws Exception {
+        String tmpStr;
+
+        tmpStr = Utils.getOption("d", options);
+        if (tmpStr.length() != 0) {
+            setMaxDepth(Integer.parseInt(tmpStr));
+            // System.out.println("depth: "+tmpStr);
+        } else {
+            setMaxDepth(1);
+        }
+
+        tmpStr = Utils.getOption("c", options);
+        if (tmpStr.length() != 0) {
+            ChiSquaredAttributeSplitMeasure chi = new ChiSquaredAttributeSplitMeasure();
+            setAttSplitMeasure(chi);
+        }
+
+        tmpStr = Utils.getOption("g", options);
+        if (tmpStr.length() != 0) {
+            IGAttributeSplitMeasure ig = new IGAttributeSplitMeasure();
+            ig.useGain = true;
+            setAttSplitMeasure(ig);
+        }
+
+        tmpStr = Utils.getOption("i", options);
+        if (tmpStr.length() != 0) {
+            GiniAttributeSplitMeasure gini = new GiniAttributeSplitMeasure();
+            setAttSplitMeasure(gini);
+        }
+
+        tmpStr = Utils.getOption("r", options);
+        if (tmpStr.length() != 0) {
+            IGAttributeSplitMeasure ig = new IGAttributeSplitMeasure();
+            ig.useGain = false;
+            setAttSplitMeasure(ig);
+        }
+
+        super.setOptions(options);
+        Utils.checkForRemainingOptions(options);
+    }
 
     /**
      * Class representing a single node in the tree.
@@ -151,7 +194,7 @@ public class CourseworkTree extends AbstractClassifier {
 
             // 0.3 some sort of stopping condition
             // Check if no instances have reached this node.
-            if (data.numInstances() == 1 || depth == maxDepth) {
+            if (data.numInstances() == 2 || depth == maxDepth) {
                 return;
             }
 
@@ -306,24 +349,24 @@ public class CourseworkTree extends AbstractClassifier {
 
         // initialize info gain trees
         CourseworkTree treeIGOptdigits = new CourseworkTree();
-        treeIGOptdigits.setOptions(Utils.splitOptions("-gain 1 -depth 3"));
+        treeIGOptdigits.setOptions(Utils.splitOptions("-g 1 -d 3"));
         CourseworkTree treeIGChinetown = new CourseworkTree();
-        treeIGChinetown.setOptions(Utils.splitOptions("-gain -depth 3"));
+        treeIGChinetown.setOptions(Utils.splitOptions("-g 1 -d 3"));
         // initialize info gain ratio trees
         CourseworkTree treeIGROptdigits = new CourseworkTree();
-        treeIGROptdigits.setOptions(Utils.splitOptions("-ratio 1 -depth 3"));
+        treeIGROptdigits.setOptions(Utils.splitOptions("-r 1 -d 3"));
         CourseworkTree treeIGRChinetown = new CourseworkTree();
-        treeIGRChinetown.setOptions(Utils.splitOptions("-ratio 1 -depth 3"));
+        treeIGRChinetown.setOptions(Utils.splitOptions("-r 1 -d 3"));
         // initialize chi squared statistic trees
         CourseworkTree treeChiOptdigits = new CourseworkTree();
-        treeChiOptdigits.setOptions(Utils.splitOptions("-chi 1 -depth 3"));
+        treeChiOptdigits.setOptions(Utils.splitOptions("-c 1 -d 3"));
         CourseworkTree treeChiChinetown = new CourseworkTree();
-        treeChiChinetown.setOptions(Utils.splitOptions("-chi 1 -depth 3"));
+        treeChiChinetown.setOptions(Utils.splitOptions("-c 1 -d 3"));
         // initialize gini index trees
         CourseworkTree treeGiniOptdigits = new CourseworkTree();
-        treeGiniOptdigits.setOptions(Utils.splitOptions("-gini 1 -depth 3"));
+        treeGiniOptdigits.setOptions(Utils.splitOptions("-i 1 -d 3"));
         CourseworkTree treeGiniChinetown = new CourseworkTree();
-        treeGiniChinetown.setOptions(Utils.splitOptions("-gini 1 -depth 3"));
+        treeGiniChinetown.setOptions(Utils.splitOptions("-i 1 -d 3"));
 
         // get random split nominal
 //        Random r1 = new Random();
@@ -388,22 +431,22 @@ public class CourseworkTree extends AbstractClassifier {
         for(Instance i:splitNominal[1]){
             //models
             double predictedChiOptdigits = treeChiOptdigits.classifyInstance(i);
-//            double predictedInfoGainOptdigits = treeIGOptdigits.classifyInstance(i);
-//            double predictedInfoGainRatioOptdigits = treeIGROptdigits.classifyInstance(i);
-//            double predictedGiniOptdigits = treeGiniOptdigits.classifyInstance(i);
+            double predictedInfoGainOptdigits = treeIGOptdigits.classifyInstance(i);
+            double predictedInfoGainRatioOptdigits = treeIGROptdigits.classifyInstance(i);
+            double predictedGiniOptdigits = treeGiniOptdigits.classifyInstance(i);
 
             //actual result
             double actual = i.classValue();
 
             // check predictions
-//            if(predictedChiOptdigits==actual)
-//                chiOptdigitsCount++;
-//            if(predictedInfoGainOptdigits==actual)
-//                infoGainOptdigitsCount++;
-//            if(predictedInfoGainRatioOptdigits==actual)
-//                infoGainRatioOptdigitsCount++;
-//            if(predictedGiniOptdigits==actual)
-//                giniOptdigitsCount++;
+            if(predictedChiOptdigits==actual)
+                chiOptdigitsCount++;
+            if(predictedInfoGainOptdigits==actual)
+                infoGainOptdigitsCount++;
+            if(predictedInfoGainRatioOptdigits==actual)
+                infoGainRatioOptdigitsCount++;
+            if(predictedGiniOptdigits==actual)
+                giniOptdigitsCount++;
         }
         System.out.println("DT using measure Chi Squared on optdigits problem has test accuracy: "+ chiOptdigitsCount/(double)splitNominal[1].numInstances());
         System.out.println("DT using measure Information Gain on optdigits problem has test accuracy: "+ infoGainOptdigitsCount/(double)splitNominal[1].numInstances());
@@ -419,12 +462,11 @@ public class CourseworkTree extends AbstractClassifier {
         int infoGainRatioChinetownCount = 0;
         int giniChinetownCount = 0;
         for(Instance i:splitNumeric[1]){
-            System.out.println(i);
             //models
-            //double predictedChiChinetown = treeChiChinetown.classifyInstance(i);
-            //double predictedInfoGainChinetown = treeIGChinetown.classifyInstance(i);
-            //double predictedInfoGainRatioChinetown = treeIGRChinetown.classifyInstance(i);
-            //double predictedGiniChinetown = treeGiniChinetown.classifyInstance(i);
+            double predictedChiChinetown = treeChiChinetown.classifyInstance(i);
+            double predictedInfoGainChinetown = treeIGChinetown.classifyInstance(i);
+            double predictedInfoGainRatioChinetown = treeIGRChinetown.classifyInstance(i);
+            double predictedGiniChinetown = treeGiniChinetown.classifyInstance(i);
 
             // Result converted from {1 ,2} to {0, 1} for the predictions
             double actual = i.classValue();
@@ -434,14 +476,14 @@ public class CourseworkTree extends AbstractClassifier {
 //            System.out.println("   Gini Predicted = "+predictedGiniChinetown);
 
             // check predictions
-//            if(predictedChiChinetown==actual)
-//                chiChinetownCount++;
-//            if(predictedInfoGainChinetown==actual)
-//                infoGainChinetownCount++;
-//            if(predictedInfoGainRatioChinetown==actual)
-//                infoGainRatioChinetownCount++;
-//            if(predictedGiniChinetown==actual)
-//                giniChinetownCount++;
+            if(predictedChiChinetown==actual)
+                chiChinetownCount++;
+            if(predictedInfoGainChinetown==actual)
+                infoGainChinetownCount++;
+            if(predictedInfoGainRatioChinetown==actual)
+                infoGainRatioChinetownCount++;
+            if(predictedGiniChinetown==actual)
+                giniChinetownCount++;
         }
 //        System.out.println(chiChinetownCount);
 //        System.out.println(infoGainChinetownCount);
@@ -451,57 +493,5 @@ public class CourseworkTree extends AbstractClassifier {
         System.out.println("DT using measure Information Gain on chinetown problem has test accuracy: "+ infoGainChinetownCount/(double)splitNumeric[1].numInstances());
         System.out.println("DT using measure Information Gain Ratio on chinetown problem has test accuracy: "+ infoGainRatioChinetownCount/(double)splitNumeric[1].numInstances());
         System.out.println("DT using measure Gini Index on chinetown problem has test accuracy: "+ giniChinetownCount/(double)splitNumeric[1].numInstances());
-
-
-
-
-//        Instances test = DatasetLoading.loadData("C:\\Work\\GitHub\\tsml\\Data\\UCI Continuous\\bank\\bank_TEST.arff");
-//        System.out.println("test instances:"+test);
-//        Instances train = DatasetLoading.loadData("C:\\Work\\GitHub\\tsml\\Data\\UCI Continuous\\bank\\bank_TRAIN.arff");
-//        System.out.println("train instances:"+train);
-    }
-
-    /**
-     * sets parameters of the decision tree.
-     */
-    public void setOptions(String[] options) throws Exception {
-        String tmpStr;
-
-        tmpStr = Utils.getOption("depth", options);
-        if (tmpStr.length() != 0) {
-            setMaxDepth(Integer.parseInt(tmpStr));
-            // System.out.println("depth: "+tmpStr);
-        } else {
-            setMaxDepth(1);
-        }
-
-        tmpStr = Utils.getOption("chi", options);
-        if (tmpStr.length() != 0) {
-            ChiSquaredAttributeSplitMeasure chi = new ChiSquaredAttributeSplitMeasure();
-            setAttSplitMeasure(chi);
-        }
-
-        tmpStr = Utils.getOption("gain", options);
-        if (tmpStr.length() != 0) {
-            IGAttributeSplitMeasure ig = new IGAttributeSplitMeasure();
-            ig.useGain = true;
-            setAttSplitMeasure(ig);
-        }
-
-        tmpStr = Utils.getOption("gini", options);
-        if (tmpStr.length() != 0) {
-            GiniAttributeSplitMeasure gini = new GiniAttributeSplitMeasure();
-            setAttSplitMeasure(gini);
-        }
-
-        tmpStr = Utils.getOption("ratio", options);
-        if (tmpStr.length() != 0) {
-            IGAttributeSplitMeasure ig = new IGAttributeSplitMeasure();
-            ig.useGain = false;
-            setAttSplitMeasure(ig);
-        }
-
-        super.setOptions(options);
-        Utils.checkForRemainingOptions(options);
     }
 }
