@@ -125,8 +125,8 @@ public class ClassifierEvaluation {
             DatasetLoading.setProportionKeptForTraining(0.75);
 //            Experiments.setupAndRunExperiment(expSettings);
             expSettings.run();
-        }
 
+        }
         public static void evaluateInCode() throws Exception {
             String problem = "bank";
             Instances data = DatasetLoading.loadData(basePath+problem+"/"+problem+".arff");
@@ -179,12 +179,9 @@ public class ClassifierEvaluation {
             expSettings.classifierName = names[i];
             expSettings.classifier = cls[i];
             for (String str : allProblems) {
-                // doing 5 resamples here
                 for (int j = 0; j < 5; j++) {
                     expSettings.datasetName = str;
                     expSettings.foldId = j;  // note that since we're now setting the fold directly, we can resume zero-indexing
-
-                    // can run the experiment either way:
                     Experiments.setupAndRunExperiment(expSettings);
 //                    expSettings.run();
                 }
@@ -214,7 +211,7 @@ public class ClassifierEvaluation {
  *  Work out AUROC
  */
 //            runExperimentManually();
-            runExperimentAutomatically();
+//            runExperimentAutomatically();
 //            runMultipleExperiments();
 
             /*  Part 2: Generating performance measures in code */
@@ -222,7 +219,7 @@ public class ClassifierEvaluation {
 /*  Part 3: Generating performance measures from results files
              */
             //Create results files
-//            multipleClassifierEvaluation();
+            multipleClassifierEvaluation();
             //Compare
 //            compareClassifiers();
 
